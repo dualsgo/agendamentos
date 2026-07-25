@@ -185,17 +185,22 @@ function registrarAlteracao(rowIndex, campo, valorAntigo, valorNovo, usuario) {
 function getSpreadsheet() {
   try {
     let ss = SpreadsheetApp.getActiveSpreadsheet();
-    if (!ss || !ss.getSheetByName(NOME_ABA)) {
-      const files = DriveApp.getFilesByName(NOME_PLANILHA);
-      if (files.hasNext()) {
-        ss = SpreadsheetApp.open(files.next());
-        if (!ss.getSheetByName(NOME_ABA)) {
-          console.warn("Aba 'Agenda' não encontrada na planilha");
-          return null;
-        }
+    if (ss && (ss.getSheetByName(NOME_ABA) || ss.getSheetByName("Agendamentos"))) return ss;
+
+    const files = DriveApp.getFilesByName(NOME_PLANILHA);
+    if (files.hasNext()) {
+      ss = SpreadsheetApp.open(files.next());
+      if (ss) return ss;
+    }
+
+    const filesAll = DriveApp.getFilesByType(MimeType.GOOGLE_SHEETS);
+    while (filesAll.hasNext()) {
+      const candidate = SpreadsheetApp.open(filesAll.next());
+      if (candidate && (candidate.getSheetByName("Agenda") || candidate.getSheetByName("Agendamentos"))) {
+        return candidate;
       }
     }
-    return ss;
+    return null;
   } catch (e) {
     console.error("Erro ao acessar planilha:", e);
     return null;
