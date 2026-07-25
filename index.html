@@ -258,6 +258,27 @@
     </div>
   </div>
 
+  <div id="modal-resposta-rapida" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 modal-enter shadow-2xl border-t-4 border-blue-600">
+      <div class="flex justify-between items-center mb-4">
+         <h2 class="text-lg font-bold text-blue-600 flex items-center gap-2"><span class="material-symbols-outlined">reply</span> Resposta Rápida</h2>
+         <button type="button" onclick="fecharModal('modal-resposta-rapida')" class="p-1 text-slate-400 hover:text-error"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Sugestões de Texto:</p>
+      <div class="flex flex-wrap gap-1.5 mb-4">
+         <button type="button" onclick="inserirTextoResposta('regras')" class="py-1.5 px-2.5 bg-indigo-50 text-indigo-700 font-bold text-[9px] rounded-lg border border-indigo-200 hover:bg-indigo-100 transition-colors uppercase tracking-wide">Regras do Shopping</button>
+         <button type="button" onclick="inserirTextoResposta('sugerir_data')" class="py-1.5 px-2.5 bg-amber-50 text-amber-700 font-bold text-[9px] rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors uppercase tracking-wide">Sugerir Nova Data</button>
+         <button type="button" onclick="inserirTextoResposta('confirmar')" class="py-1.5 px-2.5 bg-green-50 text-green-700 font-bold text-[9px] rounded-lg border border-green-200 hover:bg-green-100 transition-colors uppercase tracking-wide">Confirmar Agendamento</button>
+      </div>
+      <p class="text-[10px] font-black text-slate-400 mb-2 uppercase">Mensagem para o fornecedor:</p>
+      <textarea id="resposta-texto" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-700 mb-4 focus:ring-blue-600 outline-none shadow-inner"></textarea>
+      <div class="flex gap-2">
+         <button type="button" onclick="document.getElementById('resposta-texto').value = '';" class="flex-1 py-3 bg-slate-100 text-slate-600 font-bold text-[10px] uppercase rounded-xl hover:bg-slate-200 transition-colors border border-slate-200">Limpar</button>
+         <button type="button" onclick="enviarRespostaRapida()" class="flex-[2] py-3 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform hover:bg-blue-700"><span class="material-symbols-outlined text-[18px]">send</span> Enviar Resposta</button>
+      </div>
+    </div>
+  </div>
+
   <div id="modal-settings" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-md p-8 modal-enter shadow-2xl">
        <div class="flex justify-between items-center mb-6">
@@ -347,12 +368,17 @@
                    <textarea id="f-obs-mob" rows="2" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm"></textarea>
                 </div>
                 
-                <div class="pt-6 border-t border-slate-100 flex flex-wrap md:flex-nowrap gap-3">
-                   <button type="submit" id="btn-confirmar-modal" class="flex-[2] py-4 rounded-2xl bg-green-600 font-black text-white shadow-xl shadow-green-600/30 active:scale-95 transition-all text-sm uppercase tracking-wider">Confirmar Informações</button>
-                   <button type="button" id="btn-visto-modal" onclick="excluir(document.getElementById('f-id').value); fecharModal('modal-agendamento')" class="flex-1 py-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-[10px] active:scale-95 transition-all uppercase">Visto</button>
-                   <button type="button" onclick="abrirGmail()" class="flex-1 py-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 font-black text-[10px] flex items-center justify-center gap-2 hover:bg-slate-200 active:scale-95 transition-all uppercase">
-                      <span class="material-symbols-outlined text-[18px] text-primary">mail</span> Gmail
-                   </button>
+                <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-2">
+                   <button type="submit" id="btn-confirmar-modal" class="w-full py-4 rounded-2xl bg-green-600 font-black text-white shadow-xl shadow-green-600/30 active:scale-95 transition-all text-sm uppercase tracking-wider mb-2">Confirmar Informações</button>
+                   <div class="flex w-full gap-2">
+                      <button type="button" onclick="abrirRespostaRapida()" class="flex-1 py-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 font-black text-[10px] flex items-center justify-center gap-1.5 hover:bg-blue-100 active:scale-95 transition-all uppercase">
+                         <span class="material-symbols-outlined text-[16px]">reply</span> Responder
+                      </button>
+                      <button type="button" onclick="abrirGmail()" class="flex-1 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 font-black text-[10px] flex items-center justify-center gap-1.5 hover:bg-slate-200 active:scale-95 transition-all uppercase">
+                         <span class="material-symbols-outlined text-[16px] text-primary">mail</span> Gmail
+                      </button>
+                      <button type="button" id="btn-visto-modal" onclick="excluir(document.getElementById('f-id').value); fecharModal('modal-agendamento')" class="flex-1 py-3 rounded-2xl bg-white border border-slate-200 text-slate-400 font-black text-[10px] active:scale-95 transition-all uppercase hover:bg-slate-50">Visto</button>
+                   </div>
                 </div>
              </div>
           </div>
@@ -1479,6 +1505,63 @@
           window.open(`https://mail.google.com/mail/u/0/#all/${id.trim()}`, '_blank');
        } else {
           notify('Aviso', 'Este agendamento não possui e-mail vinculado.', 'warning');
+       }
+    }
+
+    function abrirRespostaRapida() {
+       const id = document.getElementById('f-id').value;
+       if (!id || id.startsWith('ROW_')) {
+          notify('Aviso', 'Não há um e-mail vinculado a este agendamento para responder.', 'warning');
+          return;
+       }
+       document.getElementById('resposta-texto').value = '';
+       abrirModalGenerico('modal-resposta-rapida');
+    }
+
+    function inserirTextoResposta(tipo) {
+       const dt = document.getElementById('f-data').value;
+       let dtFormatada = dt;
+       if (dt) {
+          const dObj = parseSafeDate(dt);
+          if (dObj) dtFormatada = `${String(dObj.getDate()).padStart(2,'0')}/${String(dObj.getMonth()+1).padStart(2,'0')}/${dObj.getFullYear()}`;
+       }
+       
+       let texto = "";
+       if (tipo === 'regras') {
+          texto = "Informamos que, por padrão, o shopping permite que as entregas ocorram com auxílio de carrinho circulando pelo mall até as 10h30 (agendamos das 09h às 10h30). Após esse horário e até as 14h, é permitido somente carregando nas mãos.\n\nAlém disso, a entrega precisa ser realizada no mezanino/estoque, o que exige subir um lance de aproximadamente 14 degraus e aguardar a conferência item a item.";
+       } else if (tipo === 'sugerir_data') {
+          texto = `Olá,\n\nInfelizmente não temos disponibilidade para a data solicitada.\n\nPodemos confirmar o recebimento para o dia ${dtFormatada}?\n\nFicamos no aguardo da confirmação.\n\nAtenciosamente,\nEquipe de Estoque`;
+       } else if (tipo === 'confirmar') {
+          texto = `Olá,\n\nRecebemos sua solicitação e o agendamento foi confirmado para o dia ${dtFormatada}.\n\nAtenciosamente,\nEquipe de Estoque`;
+       }
+       
+       const textArea = document.getElementById('resposta-texto');
+       if (textArea.value.trim() !== '') {
+          textArea.value += "\n\n" + texto;
+       } else {
+          textArea.value = texto;
+       }
+    }
+
+    async function enviarRespostaRapida() {
+       const id = document.getElementById('f-id').value;
+       const msg = document.getElementById('resposta-texto').value.trim();
+       if (!msg) {
+          notify('Erro', 'A mensagem não pode estar vazia.', 'error');
+          return;
+       }
+       
+       notify('Enviando...', 'Aguarde', 'info');
+       try {
+          const res = await gas('responderEmail', id, msg);
+          if (res === 'OK') {
+             notify('Sucesso', 'E-mail enviado com sucesso!', 'success');
+             fecharModal('modal-resposta-rapida');
+          } else {
+             notify('Erro', res, 'error');
+          }
+       } catch (e) {
+          notify('Erro', 'Falha ao enviar resposta.', 'error');
        }
     }
 

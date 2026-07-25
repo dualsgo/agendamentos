@@ -600,6 +600,25 @@ function atualizarDataSugerida(rowIndex, novaData) {
   return atualizarAgendamento(rowIndex, { data_sugerida: dataFormatada });
 }
 
+function responderEmail(id, mensagem) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    if (!id || !mensagem) return "ERRO: ID ou mensagem ausente.";
+    const thread = GmailApp.getThreadById(id.trim());
+    if (!thread) return "ERRO: E-mail não encontrado no Gmail.";
+    
+    thread.reply(mensagem);
+    logAcao('responderEmail', { id }, 'OK');
+    return "OK";
+  } catch (e) {
+    logAcao('responderEmail', { id }, 'ERRO: ' + e.message);
+    return "ERRO INTERNO: " + e.message;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
