@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-br">
+<head>
+  <base target="_top">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>Ri Happy | Estoque</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script id="tailwind-config">
+    tailwind.config = { darkMode: "class", theme: { extend: { colors: {
+      "background": "#f8fafc", "on-surface": "#0f172a", "outline": "#64748b", "surface-container": "#f1f5f9", "primary": "#E3000F", "primary-fixed": "#fee2e2", "error": "#dc2626", "tertiary": "#d97706"
+    }, fontFamily: { "headline": ["Manrope"], "body": ["Inter"] } } } }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    .modal-enter { animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    
+    .notif-container { position: fixed; top: 16px; left: 16px; right: 16px; z-index: 9999; pointer-events: none; display: flex; flex-direction: column; gap: 8px;}
+    @media (min-width: 768px) { .notif-container { left: auto; width: 380px; } }
+    .notif { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); animation: slideDown 0.4s forwards; pointer-events: auto; }
+    @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; }
+    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    .snap-x { scroll-snap-type: x mandatory; } 
+    .snap-center { scroll-snap-align: center; }
+    .pb-safe { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+
+    /* Estilos de Sugestão de Data */
+    .pattern-stripes {
+      background: repeating-linear-gradient(45deg, #f0fdf4, #f0fdf4 10px, #dcfce7 10px, #dcfce7 20px) !important;
+      border: 1px dashed #22c55e !important;
+    }
+    .past-empty {
+      background-color: #f8fafc !important;
+      opacity: 0.3 !important;
+      filter: grayscale(1);
+    }
+    .dotted-alert {
+      border: 2px dotted #dc2626 !important;
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0% { border-color: #dc2626; opacity: 1; }
+      50% { border-color: transparent; opacity: 0.8; }
+      100% { border-color: #dc2626; opacity: 1; }
+    }
+
+    /* SIDEBAR COLLAPSE LOGIC */
+    .sidebar-transition { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .sidebar-expanded { width: 380px !important; }
+    .sidebar-collapsed { width: 80px !important; padding-left: 12px !important; padding-right: 12px !important; }
+    .sidebar-expanded .collapsed-only { display: none !important; }
+    .sidebar-collapsed .expanded-only { display: none !important; }
+
+    /* BADGES DE STATUS E AÇÕES */
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-pendente { background: #fef3c7; color: #92400e; }
+    .status-confirmado { background: #dbeafe; color: #1e40af; }
+    .status-em-tratativa { background: #fed7aa; color: #9a3412; }
+    .status-concluido { background: #d1fae5; color: #065f46; }
+    .status-cancelado { background: #fee2e2; color: #991b1b; }
+    .status-atrasado { background: #fecaca; color: #dc2626; animation: pulse-badge 1.5s infinite; }
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .action-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-btn:hover { transform: scale(1.05); }
+    .action-btn:active { transform: scale(0.95); }
+    
+    .btn-confirmar { background: #2563eb; color: white; }
+    .btn-tratativa { background: #f59e0b; color: white; }
+    .btn-cancelar { background: #dc2626; color: white; }
+    .btn-data { background: #8b5cf6; color: white; }
+    .btn-gmail { background: #ea4335; color: white; }
+    .btn-editar { background: #64748b; color: white; }
+    .btn-checkin { background: #16a34a; color: white; }
+
+    /* Dropdown de ações rápidas */
+    .actions-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .actions-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: white;
+      min-width: 160px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      padding: 6px;
+      z-index: 1000;
+      border: 1px solid #e2e8f0;
+    }
+    .actions-dropdown-content.show { display: block; }
+    .actions-dropdown-content button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      background: none;
+      font-size: 11px;
+      font-weight: 600;
+      color: #0f172a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .actions-dropdown-content button:hover { background: #f1f5f9; }
+    .actions-dropdown-content .material-symbols-outlined { font-size: 18px; }
+  </style>
+</head>
+<body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden selection:bg-primary-fixed selection:text-primary">
+
+  <div id="notif-container" class="notif-container"></div>
+
+  <!-- MODAIS EXISTENTES (mantidos) -->
+  <div id="modal-atraso" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl modal-enter border-t-8 border-error flex flex-col max-h-[90vh]">
+      <div class="p-6 text-center">
+        <div class="w-14 h-14 bg-red-100 text-error rounded-full flex items-center justify-center mx-auto mb-4"><span class="material-symbols-outlined text-3xl">warning</span></div>
+        <h2 class="text-xl font-black mb-1">Atenção ao Estoque!</h2>
+        <p class="text-xs text-outline mb-4">Existem <strong id="qtd-atrasados" class="text-error font-black">0</strong> agendamentos marcados como atrasados.</p>
+      </div>
+      <div id="modal-atraso-lista" class="px-6 pb-6 overflow-y-auto space-y-3 custom-scrollbar flex-1"></div>
+      <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3">
+        <button type="button" onclick="fecharModal('modal-atraso')" class="flex-1 py-4 rounded-2xl bg-white border border-slate-200 text-slate-600 font-bold text-sm active:scale-95 transition-transform">Verificar Depois</button>
+        <button type="button" onclick="fecharModal('modal-atraso'); mudarAba('pendentes')" class="flex-1 py-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/30 active:scale-95 transition-transform">Ir para Pendentes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-help" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl modal-enter">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-primary flex items-center gap-2"><span class="material-symbols-outlined">help</span> Fluxo do Estoque</h2><button type="button" onclick="fecharModal('modal-help')" class="p-1 hover:text-error"><span class="material-symbols-outlined">close</span></button></div>
+      <div class="space-y-4 text-sm text-outline leading-relaxed">
+        <p><strong>1. Caixa de Entrada:</strong> Alertas gerados pela IA. Trate no Gmail, volte e confirme para agendar, ou marque como visto.</p>
+        <p><strong>2. Gestão:</strong> Acompanhe notas nas abas Pendentes e Recebidos.</p>
+        <p><strong>3. Baixa:</strong> Marque as notas que chegaram fisicamente e use "Dar Baixa" para finalizar e registrar a data real.</p>
+      </div>
+      <button type="button" onclick="fecharModal('modal-help')" class="w-full mt-6 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md active:scale-95 transition-transform">Entendi</button>
+    </div>
+  </div>
+
+  <div id="modal-sap" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6 text-center border-t-8 border-primary modal-enter">
+      <span class="material-symbols-outlined text-5xl text-primary mb-4">domain</span>
+      <h2 class="text-xl font-bold mb-2">Lembrete SAP!</h2>
+      <p class="text-sm text-outline mb-6">A baixa física foi registrada no estoque.<br><strong class="text-on-surface">Lembre-se de dar a entrada fiscal no sistema SAP!</strong></p>
+      <button type="button" onclick="fecharModal('modal-sap')" class="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-md active:scale-95 transition-transform">Sim, Feito!</button>
+    </div>
+  </div>
+
+  <div id="modal-wpp" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 modal-enter">
+      <div class="flex justify-between items-center mb-4"><h2 class="text-lg font-bold text-[#25D366] flex items-center gap-2"><span class="material-symbols-outlined">chat</span> Compartilhar</h2><button type="button" onclick="fecharModal('modal-wpp')" class="p-1 hover:text-error"><span class="material-symbols-outlined">close</span></button></div>
+      <textarea id="wpp-texto" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-700 mb-4 outline-none" readonly></textarea>
+      <button type="button" onclick="copiarWpp()" class="w-full py-3.5 bg-[#25D366] text-white font-bold rounded-xl shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform"><span class="material-symbols-outlined text-sm">content_copy</span> Copiar Texto</button>
+    </div>
+  </div>
+
+  <div id="modal-checkin" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-enter border-t-8 border-green-600 flex flex-col max-h-[95vh] overflow-hidden">
+      <div class="p-6 text-center shrink-0 border-b border-slate-100">
+        <div class="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><span class="material-symbols-outlined text-3xl">task_alt</span></div>
+        <h2 class="text-xl font-black mb-1">Confirmar Recebimento</h2>
+        <p class="text-xs text-outline font-medium">Selecione o tipo de recebimento para prosseguir</p>
+      </div>
+
+      <div class="p-6 space-y-5 overflow-y-auto custom-scrollbar">
+        <div class="grid grid-cols-2 gap-3">
+           <button type="button" id="btn-checkin-full" onclick="selecionarTipoCheckin('FULL')" class="p-4 border-2 border-green-600 bg-green-50 rounded-2xl flex flex-col items-center gap-2 transition-all">
+              <span class="material-symbols-outlined text-green-600">done_all</span>
+              <span class="text-[10px] font-black uppercase">Integral</span>
+           </button>
+           <button type="button" id="btn-checkin-diff" onclick="selecionarTipoCheckin('DIFF')" class="p-4 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center gap-2 transition-all">
+              <span class="material-symbols-outlined text-slate-400">difference</span>
+              <span class="text-[10px] font-black uppercase">Divergência</span>
+           </button>
+        </div>
+
+        <div id="checkin-diff-fields" class="hidden space-y-4 pt-4 border-t border-slate-100">
+           <div>
+              <label class="block text-[10px] font-black text-slate-400 mb-1 uppercase">Total de Volumes Recebidos</label>
+              <input type="number" id="c-vols-rec" class="w-full border-slate-200 rounded-xl p-3 text-sm focus:ring-green-600 shadow-sm font-black" placeholder="Qtd total no caminhão">
+           </div>
+           
+           <div class="space-y-3">
+              <label class="block text-[10px] font-black text-slate-400 uppercase">Itens Faltantes / Divergências</label>
+              <div id="c-diff-items-list" class="space-y-3"></div>
+              <button type="button" onclick="addDivergenciaLinha()" class="w-full py-3 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 font-bold text-[10px] uppercase hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                 <span class="material-symbols-outlined text-sm">add_circle</span> Adicionar Divergência
+              </button>
+           </div>
+        </div>
+        
+        <input type="hidden" id="c-ids">
+        <input type="hidden" id="c-type" value="FULL">
+      </div>
+
+      <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3">
+        <button type="button" onclick="fecharModal('modal-checkin')" class="flex-1 py-4 rounded-2xl bg-white border border-slate-200 text-slate-600 font-bold text-sm active:scale-95 transition-transform">Cancelar</button>
+        <button type="button" onclick="confirmarCheckin()" class="flex-1 py-4 rounded-2xl bg-green-600 text-white font-bold text-sm shadow-lg shadow-green-600/30 active:scale-95 transition-transform">Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-dia" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl modal-enter border-t-8 border-primary flex flex-col max-h-[90vh] overflow-hidden">
+      <div class="p-6 shrink-0 border-b border-slate-100 flex justify-between items-center">
+        <div>
+           <h2 class="text-xl font-black text-slate-800" id="modal-dia-titulo">Entregas do Dia</h2>
+           <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1" id="modal-dia-sub">Resumo das cargas</p>
+        </div>
+        <button type="button" onclick="fecharModal('modal-dia')" class="p-2 bg-slate-100 rounded-full hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div id="modal-dia-lista" class="p-6 overflow-y-auto space-y-4 custom-scrollbar flex-1 bg-slate-50"></div>
+    </div>
+  </div>
+
+  <div id="modal-settings" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md p-8 modal-enter shadow-2xl">
+       <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-black text-slate-800">Configurações</h2>
+          <button type="button" onclick="fecharModal('modal-settings')" class="p-1 hover:text-error"><span class="material-symbols-outlined">close</span></button>
+       </div>
+       <form id="form-settings" class="space-y-6">
+          <div><label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Capacidade Máxima Diária (Vols)</label><input type="number" id="s-limite" class="w-full bg-slate-50 border-slate-200 rounded-2xl p-4 font-bold text-lg focus:ring-primary"></div>
+          <div><label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Data do Próximo Inventário Geral</label><input type="date" id="s-inventario" class="w-full bg-slate-50 border-slate-200 rounded-2xl p-4 font-bold text-lg focus:ring-primary"><p class="text-[10px] text-outline mt-2 leading-relaxed">⚠️ As entregas serão automaticamente bloqueadas no dia, um dia antes e um dia depois desta data.</p></div>
+          <button type="submit" class="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 active:scale-95 transition-transform">Salvar Alterações</button>
+       </form>
+    </div>
+  </div>
+
+  <div id="modal-agendamento" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center md:p-4 transition-opacity">
+    <div class="bg-white rounded-t-3xl md:rounded-2xl w-full max-w-4xl shadow-2xl modal-enter overflow-hidden flex flex-col max-h-[95vh]">
+       
+       <form id="form-agendamento" class="flex flex-col md:flex-row overflow-hidden">
+          <input type="hidden" id="f-id">
+          <input type="hidden" id="f-remetente">
+          <input type="hidden" id="f-assunto">
+          <input type="hidden" id="f-resumo-direto">
+          <input type="hidden" id="f-status" value="PENDENTE">
+          <input type="hidden" id="f-row-index">
+
+          <!-- Coluna Esquerda: Contexto e Obs -->
+          <div class="hidden md:flex flex-col w-[320px] bg-slate-50 border-r border-slate-200 p-6 overflow-y-auto custom-scrollbar">
+             <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">info</span> Contexto & Detalhes</h3>
+             <div id="email-context-view" class="space-y-4 mb-6"></div>
+             
+             <div class="mt-auto pt-6 border-t border-slate-200">
+                <label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-wide">Observações do Recebimento</label>
+                <textarea id="f-obs" rows="5" placeholder="Instruções para o estoque, volumes individuais, etc..." class="w-full bg-white border-slate-200 rounded-xl p-3 text-xs focus:ring-primary focus:border-primary shadow-sm"></textarea>
+             </div>
+          </div>
+          
+          <!-- Coluna Direita: Dados Principais -->
+          <div class="flex-1 p-6 md:p-8 overflow-y-auto custom-scrollbar bg-white">
+             <div class="flex justify-between items-center mb-6">
+                <div>
+                   <h2 id="modal-title" class="text-xl font-black text-slate-800 leading-none">Agendamento</h2>
+                   <p class="text-[10px] font-bold text-outline uppercase mt-1">Preencha os dados da carga</p>
+                </div>
+                <button type="button" onclick="fecharModal('modal-agendamento')" class="p-2 bg-slate-100 rounded-full hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
+             </div>
+
+             <div class="space-y-5">
+                <div>
+                   <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Data Prevista de Entrega</label>
+                   <input type="date" id="f-data" required class="w-full border-slate-200 rounded-xl p-4 font-bold text-sm focus:ring-primary focus:border-primary shadow-sm">
+                   <p id="f-warning" class="text-[10px] text-error font-black mt-2 hidden flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Capacidade máxima atingida!</p>
+                </div>
+                
+                <div>
+                   <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Fornecedor / Remetente</label>
+                   <input type="text" id="f-fornecedor" required placeholder="Ex: Ri Happy / Mattel" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm font-medium">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                   <div>
+                      <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide italic">Nota Fiscal (NF)</label>
+                      <input type="text" id="f-nf" required placeholder="000.000" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm font-mono">
+                   </div>
+                   <div>
+                      <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide italic">Volume Total</label>
+                      <input type="number" id="f-volumes" required placeholder="Qtd" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm font-black">
+                   </div>
+                </div>
+
+                <div>
+                   <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Status</label>
+                   <select id="f-status-select" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm font-bold">
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="CONFIRMADO">Confirmado</option>
+                      <option value="EM TRATATIVA">Em Tratativa</option>
+                      <option value="ATRASADO">Atrasado</option>
+                      <option value="CANCELADO">Cancelado</option>
+                      <option value="CONCLUÍDO">Concluído</option>
+                   </select>
+                </div>
+
+                <div class="md:hidden">
+                   <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Observações</label>
+                   <textarea id="f-obs-mob" rows="2" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm"></textarea>
+                </div>
+                
+                <div class="pt-6 border-t border-slate-100 flex flex-wrap md:flex-nowrap gap-3">
+                   <button type="submit" id="btn-confirmar-modal" class="flex-[2] py-4 rounded-2xl bg-green-600 font-black text-white shadow-xl shadow-green-600/30 active:scale-95 transition-all text-sm uppercase tracking-wider">Confirmar Informações</button>
+                   <button type="button" id="btn-visto-modal" onclick="excluir(document.getElementById('f-id').value); fecharModal('modal-agendamento')" class="flex-1 py-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 font-black text-[10px] active:scale-95 transition-all uppercase">Visto</button>
+                   <button type="button" onclick="abrirGmail()" class="flex-1 py-4 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 font-black text-[10px] flex items-center justify-center gap-2 hover:bg-slate-200 active:scale-95 transition-all uppercase">
+                      <span class="material-symbols-outlined text-[18px] text-primary">mail</span> Gmail
+                   </button>
+                </div>
+             </div>
+          </div>
+       </form>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-2.5 flex justify-between items-center shrink-0 z-30 shadow-sm relative">
+    <div class="flex items-center gap-3">
+      <button type="button" onclick="toggleSidebar()" class="hidden md:flex p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-primary transition-colors items-center justify-center">
+         <span id="sidebar-icon" class="material-symbols-outlined">menu_open</span>
+      </button>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
+      <div class="hidden lg:flex flex-col border-l border-slate-200 pl-4 ml-2">
+        <span class="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Carioca</span>
+        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Estoque</span>
+      </div>
+    </div>
+    
+    <!-- KPIs Centralizados -->
+    <div class="hidden md:flex items-center gap-6">
+       <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ativos:</span>
+          <span id="kpi-ativos-desk" class="text-sm font-black text-slate-800">0</span>
+       </div>
+       <div class="w-px h-4 bg-slate-200"></div>
+       <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(227,0,15,0.4)]"></div>
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atrasados:</span>
+          <span id="kpi-atraso-desk" class="text-sm font-black text-error">0</span>
+       </div>
+    </div>
+    
+    <div class="flex items-center gap-2 md:gap-3">
+       <button type="button" onclick="abrirModalGenerico('modal-help')" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">help</span></button>
+       <button type="button" onclick="abrirSettings()" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">settings</span></button>
+       <button type="button" onclick="gerarTextoWpp()" class="w-9 h-9 bg-[#25D366]/10 rounded-full flex items-center justify-center text-[#25D366] hover:bg-[#25D366]/20 transition-colors"><span class="material-symbols-outlined text-[18px]">chat</span></button>
+       <button type="button" onclick="abrirModal()" class="w-9 h-9 md:w-auto md:px-4 md:py-2 bg-primary text-white rounded-full md:rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-xs flex items-center justify-center active:scale-95">
+         <span class="material-symbols-outlined text-[20px] md:mr-1.5">add</span> <span class="hidden md:inline">Agendar</span>
+       </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 overflow-hidden flex w-full max-w-[1600px] mx-auto bg-background pb-safe md:pb-0 relative">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-expanded hidden md:flex flex-col border-r border-slate-200 py-6 px-4 h-full bg-white shrink-0 z-10 sidebar-transition custom-scrollbar shadow-[4px_0_24px_-10px_rgba(0,0,0,0.05)]">
+       <div class="flex items-center justify-between mb-4 px-2 shrink-0">
+          <div class="flex items-center gap-2 expanded-only">
+             <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2"><span class="material-symbols-outlined text-tertiary">mail</span> Caixa de Entrada</h2>
+             <span id="flow-count-desk" class="bg-error text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">0</span>
+          </div>
+          <div class="flex items-center gap-1.5 ml-auto">
+             <button type="button" onclick="carregarDados(true)" title="Sincronizar com a Planilha" class="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-500 hover:text-primary transition-all flex items-center justify-center active:scale-95 shadow-sm">
+                <span class="material-symbols-outlined text-[18px] sync-icon">refresh</span>
+             </button>
+             <span id="flow-count-col" class="bg-error text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm collapsed-only mx-auto">0</span>
+          </div>
+       </div>
+       
+       <div class="flex flex-col gap-2 text-[10px] font-bold text-outline uppercase tracking-wide mb-6 px-2 expanded-only shrink-0">
+         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Nova Solicitação</span>
+         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Reagendamento / Alteração</span>
+       </div>
+       
+       <div id="flow-list-desk" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar px-2"></div>
+    </aside>
+
+    <!-- MAIN SECTION -->
+    <section class="flex-1 flex flex-col h-full overflow-y-auto custom-scrollbar px-4 md:px-8 py-6 pb-safe">
+      
+      <div class="md:hidden pt-2 pb-2 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div><span class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Status: <span id="kpi-ativos-mob" class="text-slate-800">0</span> Ativos</span></div>
+        <button type="button" onclick="carregarDados(true)" class="flex items-center gap-1 text-[10px] font-black text-primary uppercase bg-primary-fixed px-2.5 py-1.5 rounded-lg active:scale-95 transition-transform"><span class="material-symbols-outlined text-[14px] sync-icon">refresh</span> Atualizar</button>
+      </div>
+
+      <div id="flow-container-mob" class="md:hidden shrink-0 w-full pt-2 mb-4">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-black text-slate-800 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">mail</span> Caixa de Entrada</h2>
+            <span id="flow-count-mob" class="bg-error text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm">0</span>
+          </div>
+          <button type="button" onclick="carregarDados(true)" title="Sincronizar" class="p-1.5 bg-white border border-slate-200 rounded-xl text-slate-600 active:scale-95 shadow-sm flex items-center justify-center">
+            <span class="material-symbols-outlined text-[16px] sync-icon">refresh</span>
+          </button>
+        </div>
+        <div id="flow-list-mob" class="flex overflow-x-auto hide-scrollbar gap-4 pb-4 snap-x w-full"></div>
+      </div>
+
+      <div class="mb-4 shrink-0 w-full">
+         <div class="hidden md:flex items-center justify-between border-b border-slate-200 w-full mb-4">
+            <div class="flex gap-2 h-[45px]">
+            <button type="button" onclick="mudarAba('pendentes')" class="nav-tab h-full px-5 border-b-2 border-primary text-primary font-black uppercase text-[11px] tracking-widest flex items-center gap-2" id="btn-nav-pendentes"><span>Agendamentos</span></button>
+            <button type="button" onclick="mudarAba('recebidos')" class="nav-tab h-full px-5 border-b-2 border-transparent text-slate-400 font-black uppercase text-[11px] tracking-widest hover:text-primary transition-colors flex items-center gap-2" id="btn-nav-recebidos"><span>Histórico</span></button>
+            <button type="button" onclick="mudarAba('divergencias')" class="nav-tab h-full px-5 border-b-2 border-transparent text-slate-400 font-black uppercase text-[11px] tracking-widest hover:text-primary transition-colors flex items-center gap-2" id="btn-nav-divergencias"><span>Divergências</span></button>
+            <button type="button" onclick="mudarAba('calendario')" class="nav-tab h-full px-5 border-b-2 border-transparent text-slate-400 font-black uppercase text-[11px] tracking-widest hover:text-primary transition-colors flex items-center gap-2" id="btn-nav-calendario"><span>Calendário</span></button>
+            </div>
+            
+            <div class="flex items-center gap-2 pb-2">
+               <div class="relative bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm min-w-[280px]">
+                  <span class="material-symbols-outlined text-[18px] text-slate-400">search</span>
+                  <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="Buscar fornecedor ou NF..." class="bg-transparent border-none p-0 text-xs font-bold focus:ring-0 text-slate-800 placeholder:text-slate-400 w-full">
+               </div>
+               
+               <select id="filter-mes" onchange="mudouFiltroMes()" class="bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-black text-primary py-1.5 pl-2 pr-7 cursor-pointer focus:ring-primary h-[34px]">
+                  <option value="">Meses</option><option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option><option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+               </select>
+               
+               <button type="button" onclick="carregarDados(true)" title="Sincronizar" class="hidden md:flex h-[34px] w-[34px] bg-slate-50 border border-slate-200 rounded-xl text-slate-400 hover:text-primary items-center justify-center transition-all"><span class="material-symbols-outlined text-[18px]">refresh</span></button>
+            </div>
+         </div>
+      </div>
+
+      <!-- VIEW: PENDENTES -->
+      <div id="view-pendentes" class="w-full flex-1 flex overflow-hidden flex-col">
+         <div id="mob-pendentes" class="md:hidden flex flex-col gap-3 pb-6"></div>
+         <div class="hidden md:flex flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-col">
+            <div class="overflow-y-auto custom-scrollbar flex-1">
+              <table class="w-full text-left border-collapse text-sm">
+                 <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest sticky top-0 z-10">
+                    <tr class="border-b border-slate-200">
+                       <th class="px-5 py-4 w-12 text-center"><input type="checkbox" onclick="toggleTodosCheckboxes(this)" class="rounded text-green-600 border-slate-300"></th>
+                       <th class="px-6 py-4">Data Agendada</th>
+                       <th class="px-6 py-4">Fornecedor</th>
+                       <th class="px-6 py-4">Nota Fiscal</th>
+                       <th class="px-6 py-4 text-center">Volumes</th>
+                       <th class="px-6 py-4">Status</th>
+                       <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                 </thead>
+                 <tbody id="desk-pendentes" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+         </div>
+      </div>
+
+      <!-- VIEW: RECEBIDOS -->
+      <div id="view-recebidos" class="hidden w-full flex-1 overflow-hidden flex-col">
+         <div id="mob-recebidos" class="md:hidden flex flex-col gap-3 pb-6"></div>
+         <div class="hidden md:flex flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-col">
+            <div class="overflow-y-auto custom-scrollbar flex-1">
+              <table class="w-full text-left text-sm">
+                 <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest sticky top-0 z-10">
+                    <tr class="border-b border-slate-200">
+                       <th class="px-6 py-4">Chegada Real</th>
+                       <th class="px-6 py-4">Fornecedor</th>
+                       <th class="px-6 py-4">Nota Fiscal</th>
+                       <th class="px-6 py-4 text-center">Vol</th>
+                       <th class="px-6 py-4">Observações</th>
+                       <th class="px-6 py-4">Status</th>
+                       <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                 </thead>
+                 <tbody id="desk-recebidos" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+         </div>
+      </div>
+
+      <!-- VIEW: DIVERGÊNCIAS -->
+      <div id="view-divergencias" class="hidden flex-col flex-1 overflow-hidden h-full">
+         <div class="p-4 md:p-8 flex-col flex gap-6 overflow-y-auto custom-scrollbar">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+               <div><h2 class="text-2xl font-black text-slate-800">Divergências</h2><p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Conferência de Faltas vs Documento</p></div>
+            </div>
+            
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden min-h-[400px]">
+               <div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400 tracking-widest"><tr class="border-b border-slate-100"><th class="px-6 py-5">Data Relatada</th><th class="px-6 py-5">NF</th><th class="px-6 py-5">Fornecedor</th><th class="px-6 py-5">SAP</th><th class="px-6 py-5 text-center">Falta Vol.</th><th class="px-6 py-5 text-center text-error">Falta Peça</th><th class="px-6 py-5 text-right">Ações</th></tr></thead><tbody id="desk-divergencias" class="text-sm"></tbody></table></div>
+            </div>
+         </div>
+      </div>
+
+      <!-- VIEW: CALENDÁRIO -->
+      <div id="view-calendario" class="hidden w-full flex-1 flex-col pb-4 md:pb-8">
+         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full min-h-[400px]">
+            <div class="p-3 md:p-4 border-b border-slate-200 flex justify-between items-center shrink-0">
+              <button type="button" onclick="mudarMesCalendario(-1)" class="p-2 text-slate-600 bg-slate-50 rounded-lg hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm md:text-base">chevron_left</span></button>
+              <span id="mes-calendario" class="font-black text-primary uppercase text-sm md:text-lg tracking-wider">...</span>
+              <button type="button" onclick="mudarMesCalendario(1)" class="p-2 text-slate-600 bg-slate-50 rounded-lg hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm md:text-base">chevron_right</span></button>
+            </div>
+            <div class="flex items-center justify-center gap-6 py-2 md:py-3 bg-slate-50 border-b border-slate-200 text-[9px] md:text-xs font-black text-slate-400 uppercase shrink-0">
+               <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-100 border border-blue-300"></span> Cap. Normal</span>
+               <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-red-100 border border-red-300"></span> Lotação Máxima</span>
+            </div>
+            <div class="p-2 md:p-4 bg-slate-50/50 flex-1 overflow-y-auto custom-scrollbar">
+               <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 md:gap-2 auto-rows-fr h-full"></div>
+            </div>
+         </div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- BARRA DE AÇÕES EM LOTE -->
+  <div id="bar-lote" class="hidden fixed bottom-[88px] md:bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white rounded-2xl p-1.5 px-4 md:px-6 items-center gap-4 md:gap-6 shadow-2xl z-40 border border-white/10 modal-enter w-[90%] md:w-auto max-w-sm">
+     <div class="flex flex-col pl-2">
+        <span id="count-lote" class="text-xl font-black text-green-400 leading-none">0</span>
+        <span class="text-[9px] uppercase font-bold text-slate-400">Selecionados</span>
+     </div>
+     <button type="button" onclick="abrirCheckinLote()" class="ml-auto bg-green-600 hover:bg-green-500 py-2.5 md:py-3 px-4 md:px-6 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 transition-colors">
+       Dar Baixa <span class="material-symbols-outlined text-[18px]">done_all</span>
+     </button>
+  </div>
+
+  <!-- NAVEGAÇÃO MOBILE -->
+  <nav class="md:hidden bg-white border-t border-slate-200 fixed bottom-0 w-full z-50 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
+    <div class="flex justify-around items-center h-[65px]">
+      <button type="button" id="nav-pendentes" onclick="mudarAba('pendentes')" class="flex flex-col items-center justify-center w-full h-full text-primary transition-colors relative">
+        <span class="material-symbols-outlined text-[24px] mb-0.5">pending_actions</span><span class="text-[9px] font-black uppercase tracking-wider">Pendentes</span>
+      </button>
+      <button type="button" id="nav-recebidos" onclick="mudarAba('recebidos')" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors">
+        <span class="material-symbols-outlined text-[24px] mb-0.5">inventory_2</span><span class="text-[9px] font-black uppercase tracking-wider">Recebidos</span>
+      </button>
+      <button type="button" id="nav-divergencias" onclick="mudarAba('divergencias')" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors">
+        <span class="material-symbols-outlined text-[24px] mb-0.5">warning</span><span class="text-[9px] font-black uppercase tracking-wider">Divergências</span>
+      </button>
+      <button type="button" id="nav-calendario" onclick="mudarAba('calendario')" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors">
+        <span class="material-symbols-outlined text-[24px] mb-0.5">edit_calendar</span><span class="text-[9px] font-black uppercase tracking-wider">Calendário</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script>
+    // ============================================================
+    // ESTADO GLOBAL
+    // ============================================================
+    let stateAlertas = [];
+    let stateAgendamentos = [];
+    let stateDivergencias = [];
+    let settings = { limite_vols: 1000, data_inventario: "" };
+    let currentDateCal = new Date(); 
+    let abaAtual = 'pendentes';
+    let dropdownAberto = null;
+
+    // ============================================================
+    // UTILITÁRIOS E CONEXÃO COM O BACKEND (GAS / VERCEL)
+    // ============================================================
+    // Se for hospedar no Vercel, insira abaixo o URL da implantação do seu Apps Script (Web App URL)
+    const API_URL_GAS = ""; 
+
+    const gas = async (fn, ...args) => {
+      // Modo 1: Execução nativa dentro do Google Apps Script
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        return new Promise((resolve, reject) => {
+          google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args);
+        });
+      }
+
+      // Modo 2: Execução remota no Vercel / Host Externo via API REST
+      if (API_URL_GAS && API_URL_GAS.startsWith("http")) {
+        try {
+          if (fn === 'getTodosOsDados' || fn === 'getSettings') {
+            const res = await fetch(`${API_URL_GAS}?action=${fn}`);
+            return await res.json();
+          } else {
+            const res = await fetch(API_URL_GAS, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: fn, args: args })
+            });
+            return await res.json();
+          }
+        } catch (e) {
+          console.error("Erro na comunicação com o backend Apps Script:", e);
+          throw e;
+        }
+      }
+
+      return [];
+    };
+
+    const notify = (title, message, type = 'info') => {
+      const container = document.getElementById('notif-container');
+      if(!container) return;
+      const el = document.createElement('div');
+      el.className = `notif`;
+      el.style.borderLeftColor = type === 'error' ? '#dc2626' : (type === 'warning' ? '#d97706' : '#E3000F');
+      el.innerHTML = `<div style="font-weight:800; font-size:14px; color:#0f172a">${title}</div><div style="font-size:12px; opacity:0.7; margin-top:2px">${message}</div>`;
+      container.appendChild(el); 
+      setTimeout(() => el.remove(), 4000);
+    };
+
+    function abrirModalGenerico(id) { 
+        const el = document.getElementById(id);
+        if(el) el.classList.remove('hidden'); 
+    }
+    
+    function fecharModal(id) { 
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden'); 
+    }
+
+    function parseSafeDate(str) {
+      if (!str || str === "—" || str === "") return null;
+      let s = String(str).trim();
+      let res = null;
+      
+      try {
+        let clean = s.split(' ')[0].split('T')[0];
+        
+        if (clean.includes('/')) {
+          const parts = clean.split('/'); 
+          if (parts.length === 3) res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]));
+        }
+        else if (clean.includes('-')) {
+          const parts = clean.split('-');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) res = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+            else res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]));
+          }
+        }
+        else {
+          res = new Date(s);
+        }
+      } catch(e) { return null; }
+      
+      return (res && !isNaN(res.getTime())) ? res : null;
+    }
+
+    function formatarDataHumanizada(str) {
+      if (!str) return '—';
+      const d = parseSafeDate(str);
+      if (!d) return str;
+      const h = new Date(); h.setHours(0,0,0,0);
+      const a = new Date(h); a.setDate(h.getDate() + 1);
+      const o = new Date(h); o.setDate(h.getDate() - 1);
+      const t = new Date(d); t.setHours(0,0,0,0);
+       if (t.getTime() === h.getTime()) return 'Hoje';
+       if (t.getTime() === a.getTime()) return 'Amanhã';
+       if (t.getTime() === o.getTime()) return 'Ontem';
+       
+       const dia = String(d.getDate()).padStart(2, '0');
+       const mes = String(d.getMonth() + 1).padStart(2, '0');
+       const ano = String(d.getFullYear()).slice(-2);
+       return `${dia}/${mes}/${ano}`;
+    }
+
+    function calcularTempoStr(dataStr) {
+       const d = parseSafeDate(dataStr);
+       if (!d) return ''; 
+       const diff = Math.floor((new Date() - d) / 60000); 
+       if (diff < 0) return 'Agora'; 
+       if (diff < 60) return diff + ' min';
+       const h = Math.floor(diff / 60); 
+       if (h < 24) return h + ' h';
+       return Math.floor(h / 24) + ' d';
+    }
+
+    function calcularTempoEurgencia(dataStr) {
+       const d = parseSafeDate(dataStr);
+       if (!d) return { text: 'Aguardando resposta', badgeClass: 'bg-slate-100 text-slate-600 border border-slate-200', icon: 'schedule' }; 
+       
+       const now = new Date();
+       const diffMs = now - d;
+       const diffMin = Math.floor(diffMs / 60000); 
+
+       if (diffMin <= 0) {
+          return { text: 'Chegou agora', badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200 font-bold', icon: 'schedule' };
+       }
+       if (diffMin < 60) {
+          return { text: `Aguardando há ${diffMin} min`, badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200 font-bold', icon: 'schedule' };
+       }
+       const h = Math.floor(diffMin / 60);
+       const minRest = diffMin % 60;
+       if (h < 24) {
+          const txt = minRest > 0 ? `Aguardando há ${h}h ${minRest}m` : `Aguardando há ${h}h`;
+          if (h >= 4) {
+             return { text: `⚠️ ${txt}`, badgeClass: 'bg-amber-100 text-amber-900 border border-amber-300 font-black animate-pulse shadow-sm', icon: 'warning' };
+          }
+          return { text: txt, badgeClass: 'bg-slate-100 text-slate-800 border border-slate-200 font-bold', icon: 'schedule' };
+       }
+       const dias = Math.floor(h / 24);
+       const txtDias = dias === 1 ? `Aguardando há 1 dia` : `Aguardando há ${dias} dias`;
+       return { text: `🚨 ${txtDias}`, badgeClass: 'bg-red-100 text-red-800 border border-red-300 font-black animate-pulse shadow-sm', icon: 'error' };
+    }
+
+    const getAvatarStyle = (nome) => {
+       const initial = (nome || 'F').charAt(0).toUpperCase();
+       const cores = ['bg-red-100 text-red-700', 'bg-blue-100 text-blue-700', 'bg-green-100 text-green-700', 'bg-amber-100 text-amber-700', 'bg-purple-100 text-purple-700', 'bg-pink-100 text-pink-700'];
+       return { initial, colorClass: cores[initial.charCodeAt(0) % cores.length] };
+    };
+
+    function getStatusBadge(status) {
+      const s = (status || 'PENDENTE').toUpperCase();
+      const classes = {
+        'PENDENTE': 'status-pendente',
+        'CONFIRMADO': 'status-confirmado',
+        'EM TRATATIVA': 'status-em-tratativa',
+        'CONCLUÍDO': 'status-concluido',
+        'CONCLUIDO': 'status-concluido',
+        'CANCELADO': 'status-cancelado',
+        'ATRASADO': 'status-atrasado'
+      };
+      return `<span class="status-badge ${classes[s] || 'status-pendente'}">${s}</span>`;
+    }
+
+    // ============================================================
+    // NAVEGAÇÃO
+    // ============================================================
+    function toggleSidebar() { 
+      const sidebar = document.getElementById('sidebar'); 
+      const icon = document.getElementById('sidebar-icon');
+      if(!sidebar || !icon) return;
+      
+      if(sidebar.classList.contains('sidebar-collapsed')) {
+         sidebar.classList.remove('sidebar-collapsed');
+         sidebar.classList.add('sidebar-expanded');
+         icon.innerText = 'menu_open';
+      } else {
+         sidebar.classList.remove('sidebar-expanded');
+         sidebar.classList.add('sidebar-collapsed');
+         icon.innerText = 'menu';
+      }
+    }
+
+    function mudarAba(aba) {
+        abaAtual = aba;
+        const views = ['pendentes', 'recebidos', 'calendario', 'divergencias'];
+        views.forEach(v => {
+           const el = document.getElementById(`view-${v}`);
+           if(el) el.style.display = (v === aba) ? 'flex' : 'none';
+        });
+
+        document.querySelectorAll('.nav-tab').forEach(b => {
+           b.classList.remove('border-primary', 'text-primary');
+           b.classList.add('border-transparent', 'text-slate-400');
+        });
+        const btn = document.getElementById(`btn-nav-${aba}`);
+        if(btn) {
+           btn.classList.add('border-primary', 'text-primary');
+           btn.classList.remove('border-transparent', 'text-slate-400');
+        }
+        
+        if (aba === 'divergencias') renderizarDivergencias();
+        atualizarBotaoLote();
+    }
+
+    // ============================================================
+    // CARREGAMENTO DE DADOS
+    // ============================================================
+    async function carregarDados(forcarAtraso = false) {
+      const syncIcons = document.querySelectorAll('.sync-icon');
+      syncIcons.forEach(icon => icon.classList.add('animate-spin'));
+      const flowDesk = document.getElementById('flow-list-desk');
+      const flowMob = document.getElementById('flow-list-mob');
+      if(flowDesk && stateAlertas.length === 0) flowDesk.innerHTML = '<div class="skeleton w-full h-32 rounded-2xl"></div>';
+      if(flowMob && stateAlertas.length === 0) flowMob.innerHTML = '<div class="skeleton w-[85vw] h-36 rounded-2xl shrink-0 snap-center"></div>';
+      
+      try {
+        const payload = await gas('getTodosOsDados');
+        const s = await gas('getSettings');
+        settings = s;
+        stateAlertas = payload.alertas || []; 
+        stateAgendamentos = payload.agendamentos || [];
+        stateDivergencias = payload.divergencias || [];
+        
+        stateAgendamentos.sort((a, b) => {
+           const d1 = parseSafeDate(a.data_agendada || a.data_real) || new Date('2099-01-01');
+           const d2 = parseSafeDate(b.data_agendada || b.data_real) || new Date('2099-01-01');
+           return d1 - d2;
+        });
+        
+        aplicarFiltros();
+        if (abaAtual === 'divergencias') renderizarDivergencias();
+        
+        if (forcarAtraso) {
+           const atrasados = stateAgendamentos.filter(i => (i.status||'').toUpperCase() === 'ATRASADO');
+           if (atrasados.length > 0) { 
+               const qtd = document.getElementById('qtd-atrasados');
+               if(qtd) qtd.innerText = atrasados.length; 
+               const lista = document.getElementById('modal-atraso-lista');
+               if(lista) {
+                  lista.innerHTML = atrasados.map(i => {
+                    const av = getAvatarStyle(i.fornecedor);
+                    return `
+                      <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl flex flex-col gap-2 relative">
+                         <div class="flex items-center gap-2">
+                             <div class="w-7 h-7 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-[10px] shrink-0">${av.initial}</div>
+                             <div class="flex-1 overflow-hidden">
+                                <h4 class="text-xs font-black text-slate-800 truncate">${i.fornecedor}</h4>
+                                <p class="text-[9px] text-outline font-mono">NF: ${i.notas_fiscais || '-'}</p>
+                             </div>
+                         </div>
+                         <div class="flex gap-2">
+                            <button onclick="window.open('https://mail.google.com/mail/u/0/#all/' + '${i.id}', '_blank')" class="flex-1 py-2 bg-white border border-slate-200 text-primary rounded-xl text-[9px] font-black uppercase flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">mail</span> Cobrar</button>
+                            <button onclick="abrirCheckinLote('${i.id}'); fecharModal('modal-atraso')" class="flex-1 py-2 bg-green-600 text-white rounded-xl text-[9px] font-black uppercase shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[12px]">task_alt</span> Baixa</button>
+                         </div>
+                      </div>
+                    `;
+                  }).join('');
+               }
+               abrirModalGenerico('modal-atraso'); 
+           }
+        }
+      } catch (e) { notify('Erro', 'Sincronização falhou.', 'error'); }
+      finally {
+        syncIcons.forEach(icon => icon.classList.remove('animate-spin'));
+      }
+    }
+
+    function mudouFiltroMes() { 
+      const v = document.getElementById('filter-mes').value;
+      if(v) currentDateCal.setMonth(parseInt(v)-1); else currentDateCal = new Date();
+      aplicarFiltros();
+    }
+
+    function mudarMesCalendario(delta) {
+        currentDateCal.setMonth(currentDateCal.getMonth() + delta);
+        const sel = document.getElementById('filter-mes');
+        if (sel) sel.value = String(currentDateCal.getMonth() + 1).padStart(2, '0');
+        aplicarFiltros(); 
+    }
+
+    function aplicarFiltros() {
+      const mesSel = document.getElementById('filter-mes');
+      const mes = mesSel ? mesSel.value : '';
+      const inputBusca = document.getElementById('search-input');
+      const busca = inputBusca ? inputBusca.value.toLowerCase() : '';
+      
+      let filtrados = stateAgendamentos.filter(i => (i.fornecedor||'').toLowerCase().includes(busca) || (i.notas_fiscais||'').toLowerCase().includes(busca));
+      
+      let fTabela = filtrados.filter(i => {
+         const dt = parseSafeDate(i.data_agendada || i.data_real);
+         if (!dt) return true;
+         if (!mes) return true;
+         return (dt.getMonth() + 1 == mes && dt.getFullYear() === currentDateCal.getFullYear());
+      });
+      
+      const ativos = fTabela.filter(i => !['CONCLUÍDO', 'CONCLUIDO'].includes((i.status||'PENDENTE').toUpperCase())).length;
+      if(document.getElementById('kpi-ativos-desk')) document.getElementById('kpi-ativos-desk').innerText = ativos;
+      if(document.getElementById('kpi-ativos-mob')) document.getElementById('kpi-ativos-mob').innerText = ativos;
+      const atrasados = fTabela.filter(i => (i.status||'').toUpperCase() === 'ATRASADO').length;
+      if(document.getElementById('kpi-atraso-desk')) document.getElementById('kpi-atraso-desk').innerText = atrasados;
+      renderizarFlow(); 
+      renderizarAgendamentos(fTabela); 
+      renderizarCalendario(filtrados);
+    }
+
+    // ============================================================
+    // RENDERIZAÇÃO
+    // ============================================================
+    function processarObservacao(item) {
+       if (typeof item === 'string') {
+          item = { observacoes: item };
+       }
+       const obs = item.observacoes || '';
+       const resumo = item.resumo_direto || '';
+       const st = (item.status || 'PENDENTE').toUpperCase();
+       const comboText = (resumo + ' ' + obs).toLowerCase();
+
+       let b = 'Nova Solicitação';
+       let badgeClass = 'bg-red-100 text-red-700 border border-red-300';
+       let borderColor = '#dc2626';
+
+       if (st === 'ALTERACAO_SOLICITADA' || st === 'EM TRATATIVA' || comboText.includes('reagendamento') || comboText.includes('sugere nova data') || comboText.includes('alteração') || comboText.includes('tratativa')) {
+          b = 'Reagendamento';
+          badgeClass = 'bg-amber-100 text-amber-800 border border-amber-300';
+          borderColor = '#d97706';
+       }
+
+       const textoExibicao = resumo || obs || 'Sem resumo disponível.';
+
+       return { 
+          badge: b, 
+          badgeClass: badgeClass, 
+          borderColor: borderColor, 
+          textFormatted: textoExibicao.replace(/\[(.*?)\]/g, '<strong>[$1]</strong>'), 
+          textRaw: textoExibicao 
+       };
+    }
+
+    window.toggleHist = function(id, btn) {
+      const p = document.getElementById(id);
+      if(!p) return;
+      if(p.classList.contains('line-clamp-2')) { p.classList.remove('line-clamp-2'); btn.innerHTML = `Ocultar`; } else { p.classList.add('line-clamp-2'); btn.innerHTML = `Ler mais`; }
+    };
+
+    function renderizarFlow() {
+      const containerDesk = document.getElementById('flow-list-desk');
+      const containerMob = document.getElementById('flow-list-mob');
+      const wrapperMob = document.getElementById('flow-container-mob');
+      if(document.getElementById('flow-count-desk')) document.getElementById('flow-count-desk').innerText = stateAlertas.length;
+      if(document.getElementById('flow-count-col')) document.getElementById('flow-count-col').innerText = stateAlertas.length;
+      if(document.getElementById('flow-count-mob')) document.getElementById('flow-count-mob').innerText = stateAlertas.length;
+      if (stateAlertas.length === 0) {
+        if(wrapperMob) wrapperMob.classList.add('hidden');
+        if(containerDesk) containerDesk.innerHTML = `<div class="expanded-only text-center py-10 text-slate-400 text-sm font-bold">Tudo limpo por aqui. ✨</div><div class="collapsed-only flex justify-center mt-4"><span class="material-symbols-outlined text-slate-300">done_all</span></div>`;
+        return;
+      }
+      if(wrapperMob) wrapperMob.classList.remove('hidden');
+      let htmlExpanded = '', htmlCollapsed = '', htmlMob = '';
+      stateAlertas.forEach((item, index) => {
+        const info = processarObservacao(item);
+        const uniqueId = item.id || `card-${index}`;
+        const urgencia = calcularTempoEurgencia(item.data_real || item.data_agendada); 
+        const dtStr = formatarDataHumanizada(item.data_sugerida);
+        const avatar = getAvatarStyle(item.fornecedor);
+        const cardBody = (isMobView) => `
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <span class="${urgencia.badgeClass} px-2.5 py-1 rounded-md text-[9px] uppercase tracking-wider flex items-center gap-1">
+               <span class="material-symbols-outlined text-[13px]">${urgencia.icon}</span> ${urgencia.text}
+            </span>
+            <span class="${info.badgeClass} px-2 py-1 rounded-md text-[8px] font-extrabold uppercase tracking-wider">${info.badge}</span>
+          </div>
+
+          <div class="flex justify-between items-start mb-1 gap-2">
+            <h3 class="font-extrabold text-on-surface text-sm truncate">${item.fornecedor || 'Desconhecido'}</h3>
+            <span class="text-[9px] font-extrabold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded-md shrink-0">Data: ${dtStr}</span>
+          </div>
+
+          <p class="text-[11px] text-outline font-mono mb-3">NF: ${item.notas_fiscais || 'N/A'} • Vol: ${item.volumes || 'N/I'}</p>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 flex-1">
+            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Resumo Direto:</p>
+            <div id="obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}" class="text-[11px] text-slate-700 leading-relaxed line-clamp-2 font-medium">${info.textFormatted}</div>
+            <button type="button" onclick="toggleHist('obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}', this)" class="text-[9px] font-extrabold text-primary mt-1 flex items-center">Ler mais</button>
+          </div>
+
+          <div class="flex flex-col gap-2 mt-auto">
+             <button type="button" onclick="abrirModal(stateAlertas[${index}], true)" class="w-full py-2.5 rounded-xl bg-primary text-white text-[10px] font-extrabold active:scale-95 transition-transform shadow-md shadow-primary/20">VISUALIZAR RESUMO</button>
+             <div class="flex gap-2">
+                <button type="button" onclick="window.open('https://mail.google.com/mail/u/0/#all/' + '${item.id}', '_blank')" class="flex-1 py-2.5 rounded-xl bg-white border border-slate-200 text-primary text-[10px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 flex items-center justify-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[14px]">mail</span> VISUALIZAR NO GMAIL</button>
+                <button type="button" onclick="excluir('${item.id}')" class="flex-0 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-outline text-[10px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 uppercase">VISTO</button>
+             </div>
+          </div>
+        `;
+        htmlMob += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 w-[85vw] shrink-0 snap-center flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(true)}</div>`;
+        htmlExpanded += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(false)}</div>`;
+        let collapseColor = info.borderColor === '#dc2626' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'; 
+        htmlCollapsed += `<div onclick="toggleSidebar()" class="w-10 h-10 rounded-full ${collapseColor} flex items-center justify-center font-extrabold text-sm shadow-sm cursor-pointer border border-slate-200 hover:scale-110 transition-transform shrink-0 mx-auto" title="${info.badge} - ${item.fornecedor}">${avatar.initial}</div>`;
+      });
+      if(containerMob) containerMob.innerHTML = htmlMob;
+      if(containerDesk) containerDesk.innerHTML = `<div class="expanded-only space-y-4 w-full">${htmlExpanded}</div><div class="collapsed-only flex flex-col items-center gap-3 w-full mt-2">${htmlCollapsed}</div>`;
+    }
+
+    function renderizarAgendamentos(lista) {
+       const pendentes = lista.filter(i => !['CONCLUÍDO', 'CONCLUIDO'].includes((i.status||'PENDENTE').toUpperCase()));
+       const recebidos = lista.filter(i => ['CONCLUÍDO', 'CONCLUIDO'].includes((i.status||'PENDENTE').toUpperCase()));
+       
+       const rMob = (arr, isRec) => {
+          if(arr.length === 0) return `<div class="text-center py-10 text-slate-400 text-sm font-bold bg-white rounded-2xl border border-slate-200 shadow-sm">Nada por aqui!</div>`;
+          return arr.map(i => {
+             let st = (i.status||'PENDENTE').toUpperCase(); 
+             let badge = st === 'ATRASADO' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'; 
+             let realIdx = stateAgendamentos.findIndex(x => x.id === i.id); 
+             const av = getAvatarStyle(i.fornecedor); 
+             const dt = formatarDataHumanizada(isRec ? i.data_real : i.data_agendada);
+             let html = `<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm ${isRec ? 'opacity-80' : ''}">`;
+             html += `<div class="flex justify-between items-center mb-4"><div class="flex items-center gap-3">`;
+             if (!isRec) html += `<input type="checkbox" value="${i.id}" onchange="atualizarBotaoLote()" class="chk-agendamento w-5 h-5 rounded text-green-600 focus:ring-green-600 border-slate-300">`;
+             html += `<span class="text-xs font-black ${dt==='Hoje'||dt==='Amanhã' ? 'bg-primary-fixed text-primary' : 'bg-slate-100 text-slate-700'} px-2.5 py-1.5 rounded-lg flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">event</span> ${dt}</span></div>`;
+             if (!isRec) html += `<span class="${badge} px-2 py-1 rounded-md text-[9px] font-extrabold uppercase tracking-wider">${st}</span>`; else html += `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[9px] font-black uppercase flex items-center gap-1"><span class="material-symbols-outlined text-[10px] align-middle">done_all</span> REC</span>`;
+             html += `</div><div class="flex items-center gap-3 mb-4 pr-2"><div class="w-10 h-10 rounded-full ${av.colorClass} flex items-center justify-center font-black text-sm shrink-0 ${isRec?'grayscale':''}">${av.initial}</div><div class="flex flex-col overflow-hidden"><h3 class="font-extrabold text-on-surface text-base truncate ${isRec?'line-through decoration-slate-300':''}">${i.fornecedor}</h3><div class="flex gap-3 text-[11px] text-outline font-mono mt-0.5"><span>NF: ${i.notas_fiscais || '-'}</span><span>Vol: ${i.volumes || '-'}</span></div></div></div>`;
+             html += `<div class="flex justify-between items-center pt-3 border-t border-surface-variant/50">`;
+             if (!isRec) html += `<button type="button" onclick="abrirCheckinLote('${i.id}')" class="flex-1 mr-3 py-2.5 bg-green-100 text-green-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition-transform"><span class="material-symbols-outlined text-[18px]">task_alt</span> Check-in</button>`; else html += `<div class="flex-1"></div>`;
+             html += `<div class="flex gap-2"><button type="button" onclick="abrirModal(stateAgendamentos[${realIdx}], false)" class="w-10 h-10 flex items-center justify-center bg-surface-container rounded-xl text-outline active:scale-95 transition-transform"><span class="material-symbols-outlined text-[20px]">edit</span></button><button type="button" onclick="excluirTabela('${i.id}')" class="w-10 h-10 flex items-center justify-center bg-error-container/50 rounded-xl text-error active:scale-95 transition-transform"><span class="material-symbols-outlined text-[20px]">delete</span></button></div></div></div>`;
+             return html;
+          }).join('');
+       };
+       
+       const rDesk = (arr, isRec) => {
+          if(arr.length === 0) return `<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Tabela vazia.</td></tr>`;
+          return arr.map((i, idx) => {
+             let st = (i.status||'PENDENTE').toUpperCase();
+             let realIdx = stateAgendamentos.findIndex(x => x.id === i.id); 
+             const av = getAvatarStyle(i.fornecedor); 
+             const dt = formatarDataHumanizada(isRec ? i.data_real : i.data_agendada);
+             const rowIdx = i.rowIndex || 0;
+             
+             let row = `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">`;
+             if (!isRec) row += `<td class="px-5 py-4 text-center"><input type="checkbox" value="${i.id}" onchange="atualizarBotaoLote()" class="chk-agendamento rounded text-green-600 cursor-pointer border-slate-300 focus:ring-green-600 w-4 h-4"></td>`;
+             row += `<td class="px-6 py-4 font-black ${dt==='Hoje'||dt==='Amanhã' ? 'text-primary' : 'text-slate-700'}">${dt}</td><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs shrink-0 ${isRec?'grayscale opacity-50':''}">${av.initial}</div><span class="font-black text-slate-800 ${isRec?'line-through decoration-slate-300':''}">${i.fornecedor}</span></td><td class="px-6 py-4 text-outline font-mono text-xs">#${i.notas_fiscais || '-'}</td><td class="px-6 py-4 text-center font-black">${i.volumes || '-'}</td>`;
+             if (!isRec) row += `<td class="px-6 py-4">${getStatusBadge(st)}</td>`; else row += `<td class="px-6 py-4"><span class="status-badge status-concluido">Concluído</span></td>`;
+             
+             // Ações com dropdown
+             row += `<td class="px-6 py-4 text-right"><div class="flex justify-end gap-1.5">`;
+             
+             if (!isRec) {
+               // Dropdown de ações
+               row += `<div class="actions-dropdown relative">`;
+               row += `<button type="button" onclick="toggleDropdown(this)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-400 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>`;
+               row += `<div class="actions-dropdown-content">`;
+               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'CONFIRMADO')"><span class="material-symbols-outlined text-green-600">check_circle</span> Confirmar</button>`;
+               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'EM TRATATIVA')"><span class="material-symbols-outlined text-amber-600">pending</span> Em Tratativa</button>`;
+               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'CANCELADO')"><span class="material-symbols-outlined text-red-600">cancel</span> Cancelar</button>`;
+               row += `<button onclick="abrirModalData(${rowIdx})"><span class="material-symbols-outlined text-purple-600">event</span> Alterar Data</button>`;
+               row += `</div></div>`;
+               
+               row += `<button type="button" onclick="abrirCheckinLote('${i.id}')" title="Baixa" class="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">task_alt</span></button>`;
+             }
+             
+             row += `<button type="button" onclick="abrirModal(stateAgendamentos[${realIdx}], false)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-400 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>`;
+             row += `<button type="button" onclick="excluirTabela('${i.id}')" class="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+             row += `</div></td></tr>`;
+             return row;
+          }).join('');
+       };
+       
+       if(document.getElementById('mob-pendentes')) document.getElementById('mob-pendentes').innerHTML = rMob(pendentes, false); 
+       if(document.getElementById('mob-recebidos')) document.getElementById('mob-recebidos').innerHTML = rMob(recebidos, true);
+       if(document.getElementById('desk-pendentes')) document.getElementById('desk-pendentes').innerHTML = rDesk(pendentes, false); 
+       if(document.getElementById('desk-recebidos')) document.getElementById('desk-recebidos').innerHTML = rDesk(recebidos, true);
+    }
+
+    function renderizarDivergencias() {
+        const container = document.getElementById('desk-divergencias');
+        if(!container) return;
+        if(stateDivergencias.length === 0) {
+           container.innerHTML = `<tr><td colspan="7" class="text-center py-20 text-slate-400 font-bold">Nenhuma divergência registrada. ✨</td></tr>`;
+           return;
+        }
+        
+        container.innerHTML = stateDivergencias.map((i, idx) => `
+           <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+              <td class="px-6 py-5 text-slate-700 font-bold">${formatarDataHumanizada(i.data)}</td>
+              <td class="px-6 py-5 font-mono text-xs text-outline">#${i.nf || '-'}</td>
+              <td class="px-6 py-5 text-slate-800 font-black">${i.fornecedor}</td>
+              <td class="px-6 py-5 font-mono text-[11px] text-slate-500">${i.sap || '-'}</td>
+              <td class="px-6 py-5 text-center font-black">${i.vols || 0} Vol.</td>
+              <td class="px-6 py-5 text-center font-black text-error">${i.pecas || 0} Pçs</td>
+              <td class="px-6 py-5 text-right">
+                 <button type="button" onclick="excluirDivergenciaMenu(${idx})" class="w-8 h-8 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 rounded-lg flex items-center justify-center transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                 </button>
+              </td>
+           </tr>
+        `).join('');
+    }
+
+    function renderizarCalendario(lista) {
+       const grid = document.getElementById('calendar-grid'); 
+       if(!grid) return;
+       const ano = currentDateCal.getFullYear(); 
+       const mes = currentDateCal.getMonth();
+       if(document.getElementById('mes-calendario')) document.getElementById('mes-calendario').innerText = currentDateCal.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+       const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+       const primeiroDia = new Date(ano, mes, 1).getDay();
+       let htmlStr = '';
+       ['DOM','SEG','TER','QUA','QUI','SEX','SAB'].forEach(d => htmlStr += `<div class="bg-white py-2 text-center text-[10px] font-black text-slate-400 border-b border-slate-200">${d}</div>`);
+       for(let i = 0; i < primeiroDia; i++) htmlStr += `<div class="bg-slate-50/50"></div>`;
+       for(let d = 1; d <= diasNoMes; d++) {
+           const itemDate = new Date(ano, mes, d);
+           const dayOfWeek = itemDate.getDay(); 
+           const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+           
+           const today = new Date(); today.setHours(0,0,0,0);
+           const isPast = itemDate < today;
+           const isFuture = itemDate > today;
+
+           let isAfterOverload = false;
+           if(d > 1) {
+              const prevDate = new Date(ano, mes, d-1);
+              const prevVols = lista.filter(i => {
+                  let dt = parseSafeDate(i.data_agendada || i.data_real); 
+                  return dt && dt.getDate() === prevDate.getDate() && dt.getMonth() === prevDate.getMonth() && dt.getFullYear() === prevDate.getFullYear();
+              }).reduce((a, b) => a + (Number(b.volumes)||0), 0);
+              if(prevVols > settings.limite_vols) isAfterOverload = true;
+           }
+
+           let ents = lista.filter(i => { 
+               let dt = parseSafeDate(i.data_agendada || i.data_real); 
+               if(!dt) return false; 
+               return dt.getDate() === d && dt.getMonth() === mes && dt.getFullYear() === ano; 
+           });
+           
+           let vols_agendados = ents.reduce((a, b) => a + (Number(b.volumes)||0), 0);
+           let ents_recebidas = ents.filter(i => ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes((i.status||'').toUpperCase()));
+           let vols_recebidos = ents_recebidas.reduce((a, b) => a + (Number(b.vols_recebidos)||Number(b.volumes)||0), 0);
+           
+           let hasMismatch = (vols_agendados > 0 && vols_recebidos < vols_agendados && !isFuture);
+
+           let bg = '';
+           let extraClass = '';
+           let opacity = isWeekend ? 'opacity-40 grayscale-[0.5]' : '';
+           
+           if (vols_agendados === 0) {
+              if (isPast) { bg = 'past-empty'; opacity = 'opacity-20'; }
+              else if (isFuture && !isWeekend) { bg = 'pattern-stripes'; opacity = 'opacity-100'; }
+              else { bg = 'bg-white'; }
+           } else {
+              bg = vols_agendados > settings.limite_vols ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-100';
+              if (hasMismatch) extraClass = 'dotted-alert border-[3px] !border-error !z-10 shadow-lg';
+               if (hasMismatch) opacity = 'opacity-100';
+               if (isPast && !hasMismatch) opacity = 'opacity-40 grayscale-[0.3]';
+           }
+           
+           const invDate = parseSafeDate(settings.data_inventario);
+           let isBlackout = false;
+           if(invDate) {
+              const diffDays = Math.abs(Math.floor((itemDate - invDate) / 86400000));
+              if(diffDays <= 1) isBlackout = true;
+           }
+           if(isBlackout) { bg = 'bg-slate-900 text-white'; opacity = 'opacity-100'; extraClass = ''; }
+
+           htmlStr += `
+           <button type="button" onclick="${isBlackout ? "notify('Bloqueado', 'Inventário Geral', 'warning')" : `if(${vols_agendados}>0) abrirModalDia(${ano},${mes},${d})`}" class="w-full ${bg} ${opacity} ${extraClass} relative border-b border-r border-slate-200 p-1 md:p-2 min-h-[70px] md:min-h-[100px] flex flex-col justify-center items-center cursor-pointer active:scale-95 transition-transform hover:shadow-inner">
+             <span class="absolute top-1 md:top-2 right-1.5 md:right-2 text-[9px] md:text-[11px] font-bold opacity-30">${d}</span>
+             
+             ${isBlackout ? `<span class="material-symbols-outlined text-[16px] mb-1">block</span><span class="text-[7px] font-black uppercase">Inventário</span>` : ''}
+             
+             ${!isBlackout && vols_agendados === 0 && isFuture && !isWeekend ? `<div class="bg-green-600 text-white p-1 rounded-md mb-1"><span class="text-[8px] font-black uppercase leading-none block">Disponível</span></div>` : ''}
+             
+              ${!isBlackout && isAfterOverload && vols_agendados === 0 ? 
+                `<div class="bg-amber-600 border border-amber-700 p-1 rounded-md animate-pulse shadow-sm">
+                  <span class="text-[7px] font-black text-white uppercase leading-none block text-center tracking-tighter">
+                    Organizar<br>Estoque
+                  </span>
+                </div>` : ''}
+
+              ${!isBlackout && dayOfWeek === 6 && !isAfterOverload ? 
+                `<div class="bg-slate-800 p-1 rounded-md">
+                  <span class="text-[7px] font-black text-white uppercase leading-tight text-center block tracking-tighter">
+                    Organizar<br>Estoque
+                  </span>
+                </div>` : ''}
+             
+             ${!isBlackout && vols_agendados > 0 ? `
+                <span class="text-xl md:text-2xl font-black leading-none ${hasMismatch ? 'text-error' : ''}">${vols_recebidos < vols_agendados ? vols_recebidos + '<span class="text-[10px] mx-0.5 opacity-40">de</span>' + vols_agendados : vols_agendados}</span>
+                <span class="text-[7px] md:text-[9px] font-bold uppercase opacity-50 mt-1">${vols_recebidos < vols_agendados ? 'Volumes Rec.' : 'Total Vol'}</span>
+                ${hasMismatch ? `<span class="material-symbols-outlined text-error text-[14px] mt-1">warning</span>` : ''}
+             ` : ''}
+           </button>`;
+       }
+       grid.innerHTML = htmlStr;
+    }
+
+    // ============================================================
+    // AÇÕES DE ATUALIZAÇÃO (NOVAS)
+    // ============================================================
+    function toggleDropdown(btn) {
+      const content = btn.parentElement.querySelector('.actions-dropdown-content');
+      // Fecha outros dropdowns
+      document.querySelectorAll('.actions-dropdown-content.show').forEach(el => {
+        if (el !== content) el.classList.remove('show');
+      });
+      content.classList.toggle('show');
+    }
+
+    // Fecha dropdowns ao clicar fora
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.actions-dropdown')) {
+        document.querySelectorAll('.actions-dropdown-content.show').forEach(el => {
+          el.classList.remove('show');
+        });
+      }
+    });
+
+    async function atualizarStatusUI(rowIndex, novoStatus) {
+      if (!rowIndex) {
+        notify('Erro', 'Linha não identificada', 'error');
+        return;
+      }
+      
+      if (!confirm(`Deseja alterar o status para "${novoStatus}"?`)) return;
+      
+      try {
+        notify('Atualizando...', 'Aguarde', 'info');
+        const result = await gas('atualizarStatus', rowIndex, novoStatus);
+        if (result === 'OK') {
+          notify('Sucesso', `Status alterado para ${novoStatus}`, 'info');
+          carregarDados();
+        } else {
+          notify('Erro', result, 'error');
+        }
+      } catch (e) {
+        notify('Erro', 'Falha ao atualizar status', 'error');
+      }
+    }
+
+    async function abrirModalData(rowIndex) {
+      if (!rowIndex) {
+        notify('Erro', 'Linha não identificada', 'error');
+        return;
+      }
+      
+      const novaData = prompt('Informe a nova data (AAAA-MM-DD):');
+      if (!novaData) return;
+      
+      if (!novaData.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        notify('Erro', 'Formato inválido. Use AAAA-MM-DD', 'error');
+        return;
+      }
+      
+      try {
+        notify('Atualizando...', 'Aguarde', 'info');
+        const result = await gas('atualizarDataSugerida', rowIndex, novaData);
+        if (result === 'OK') {
+          notify('Sucesso', `Data alterada para ${novaData}`, 'info');
+          carregarDados();
+        } else {
+          notify('Erro', result, 'error');
+        }
+      } catch (e) {
+        notify('Erro', 'Falha ao atualizar data', 'error');
+      }
+    }
+
+    // ============================================================
+    // AÇÕES DO USUÁRIO
+    // ============================================================
+    function abrirModal(item = null, isFlow = false) {
+      const f = document.getElementById('form-agendamento'); 
+      if(f) f.reset();
+      const context = document.getElementById('email-context-view');
+      
+      if (item) {
+        document.getElementById('modal-title').innerText = isFlow ? 'Agendar Entrega' : 'Editar Agendamento';
+        document.getElementById('f-id').value = item.id || '';
+        document.getElementById('f-remetente').value = item.remetente || '';
+        document.getElementById('f-assunto').value = item.assunto || '';
+        document.getElementById('f-resumo-direto').value = item.resumo_direto || '';
+        document.getElementById('f-row-index').value = item.rowIndex || '';
+        
+        let dataIso = '';
+        const dtOb = parseSafeDate(item.data_agendada || item.data_sugerida);
+        if(dtOb) dataIso = dtOb.toISOString().split('T')[0];
+        
+        document.getElementById('f-data').value = dataIso;
+        document.getElementById('f-status').value = isFlow ? 'PENDENTE' : (item.status || 'PENDENTE');
+        document.getElementById('f-status-select').value = item.status || 'PENDENTE';
+        document.getElementById('f-fornecedor').value = item.fornecedor || '';
+        document.getElementById('f-nf').value = item.notas_fiscais || '';
+        document.getElementById('f-volumes').value = item.volumes || '';
+        
+        const cardInfo = processarObservacao(item);
+        const obsVal = isFlow ? cardInfo.textRaw : (item.observacoes || '');
+        document.getElementById('f-obs').value = obsVal;
+        if(document.getElementById('f-obs-mob')) document.getElementById('f-obs-mob').value = obsVal;
+        
+        if (isFlow) {
+           if(context) context.innerHTML = `
+             <div class="bg-white p-4 rounded-xl border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Tipo da Solicitação:</p>
+                <span class="${cardInfo.badgeClass} px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider inline-block">${cardInfo.badge}</span>
+             </div>
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Resumo Direto:</p>
+                <p class="text-xs font-bold leading-relaxed text-slate-800">${item.resumo_direto || item.observacoes || 'N/A'}</p>
+             </div>
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Remetente:</p>
+                <p class="text-xs font-medium break-all text-slate-700">${item.remetente || 'N/A'}</p>
+             </div>
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+                <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Assunto:</p>
+                <p class="text-xs font-medium text-slate-600">${item.assunto || 'N/A'}</p>
+             </div>
+           `;
+        } else {
+           if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Edição Manual</p>';
+        }
+      } else {
+        document.getElementById('modal-title').innerText = 'Novo Agendamento'; 
+        document.getElementById('f-id').value = '';
+        document.getElementById('f-resumo-direto').value = '';
+        document.getElementById('f-row-index').value = '';
+        document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
+        document.getElementById('f-status').value = 'PENDENTE';
+        document.getElementById('f-status-select').value = 'PENDENTE';
+        if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Novo Agendamento Manual</p>';
+      }
+      abrirModalGenerico('modal-agendamento');
+    }
+
+    function abrirGmail() {
+       const id = document.getElementById('f-id').value;
+       if(id && id.length > 5 && !id.startsWith('ROW_')) {
+          window.open(`https://mail.google.com/mail/u/0/#all/${id.trim()}`, '_blank');
+       } else {
+          notify('Aviso', 'Este agendamento não possui e-mail vinculado.', 'warning');
+       }
+    }
+
+    document.getElementById('f-data').addEventListener('change', (e) => {
+       const val = e.target.value;
+       if(!val) return;
+       const d = parseSafeDate(val);
+       if(!d) return;
+       
+       const volsDia = stateAgendamentos.filter(i => {
+           let dt = parseSafeDate(i.data_agendada || i.data_real); 
+           return dt && dt.getDate() === d.getDate() && dt.getMonth() === d.getMonth() && dt.getFullYear() === d.getFullYear();
+       }).reduce((a, b) => a + (Number(b.volumes)||0), 0);
+       
+       const warnEl = document.getElementById('f-warning');
+       if(volsDia >= settings.limite_vols) {
+          notify('Atenção', 'Este dia já atingiu ou superou a capacidade máxima de recebimento.', 'warning');
+          if(warnEl) warnEl.classList.remove('hidden');
+       } else {
+          if(warnEl) warnEl.classList.add('hidden');
+       }
+    });
+
+    document.getElementById('form-agendamento').addEventListener('submit', async (e) => {
+       e.preventDefault();
+       const dtStr = document.getElementById('f-data').value;
+       const nfStr = document.getElementById('f-nf').value;
+       const selfId = document.getElementById('f-id').value;
+
+       const dSel = parseSafeDate(dtStr);
+       const invDate = parseSafeDate(settings.data_inventario);
+       if(dSel && invDate) {
+          const diffDays = Math.abs(Math.floor((dSel - invDate) / 86400000));
+          if(diffDays <= 1) return notify('Data Bloqueada', 'Intervalo de Inventário Geral (Bloqueio de 3 dias)', 'error');
+       }
+
+       const nfListManual = nfStr.split(/[,;\s]+/).filter(x => x.length > 2);
+       const existingNFs = stateAgendamentos.filter(a => a.id !== selfId).map(a => String(a.notas_fiscais).split(/[,;\s]+/)).flat().filter(x => x.length > 2);
+       const duplicates = nfListManual.filter(nf => existingNFs.includes(nf));
+       
+       if(duplicates.length > 0) {
+          if(!confirm(`⚠️ ATENÇÃO: As notas [${duplicates.join(', ')}] já estão registradas em outro agendamento. Deseja prosseguir mesmo assim?`)) return;
+       }
+
+       const payload = {
+          id: selfId,
+          data_agendada: dtStr,
+          status: document.getElementById('f-status-select').value,
+          fornecedor: document.getElementById('f-fornecedor').value,
+          notas_fiscais: nfStr,
+          volumes: document.getElementById('f-volumes').value,
+          observacoes: (window.innerWidth < 768 && document.getElementById('f-obs-mob')) ? document.getElementById('f-obs-mob').value : document.getElementById('f-obs').value,
+          remetente: document.getElementById('f-remetente').value,
+          assunto: document.getElementById('f-assunto').value,
+          resumo_direto: document.getElementById('f-resumo-direto').value
+       };
+       
+       notify('Aguarde', 'Gravando agendamento...', 'info');
+       fecharModal('modal-agendamento');
+       
+       try {
+         const res = await gas('salvarAgendamento', payload);
+         if (res && res.includes('ERRO')) {
+             notify('Erro', res, 'error');
+         } else {
+             notify('Sucesso', 'Salvo com sucesso!', 'info');
+         }
+         carregarDados();
+       } catch(e) { notify('Erro', 'Falha ao salvar. Tente novamente.', 'error'); }
+    });
+
+    function abrirSettings() {
+       document.getElementById('s-limite').value = settings.limite_vols;
+       document.getElementById('s-inventario').value = settings.data_inventario;
+       abrirModalGenerico('modal-settings');
+    }
+
+    document.getElementById('form-settings').addEventListener('submit', async (e) => {
+       e.preventDefault();
+       const newS = {
+          limite_vols: document.getElementById('s-limite').value,
+          data_inventario: document.getElementById('s-inventario').value
+       };
+       notify('Salvando', 'Atualizando configurações...', 'info');
+       fecharModal('modal-settings');
+       await gas('salvarSettings', newS);
+       carregarDados();
+       notify('Sucesso', 'Configurações aplicadas!', 'info');
+    });
+
+    function toggleTodosCheckboxes(s) { 
+        document.querySelectorAll('.chk-agendamento').forEach(c => c.checked = s.checked); 
+        atualizarBotaoLote(); 
+    }
+
+    function atualizarBotaoLote() {
+       const n = document.querySelectorAll('.chk-agendamento:checked').length;
+       const b = document.getElementById('bar-lote');
+       if(n > 0 && abaAtual === 'pendentes') { 
+           if(b) { b.classList.remove('hidden'); b.classList.add('flex'); }
+           if(document.getElementById('count-lote')) document.getElementById('count-lote').innerText = n; 
+       } else { 
+           if(b) { b.classList.add('hidden'); b.classList.remove('flex'); }
+       }
+    }
+
+    // ============================================================
+    // CHECK-IN E DIVERGÊNCIAS
+    // ============================================================
+    function selecionarTipoCheckin(type) {
+       document.getElementById('c-type').value = type;
+       const fields = document.getElementById('checkin-diff-fields');
+       const btnFull = document.getElementById('btn-checkin-full');
+       const btnDiff = document.getElementById('btn-checkin-diff');
+       
+       if (type === 'DIFF') {
+          fields.classList.remove('hidden');
+          btnDiff.className = "p-5 border-2 border-green-600 bg-green-50 rounded-2xl flex flex-col items-center gap-2 transition-all";
+          btnFull.className = "p-5 border-2 border-slate-100 bg-white rounded-2xl flex flex-col items-center gap-2 transition-all";
+          if(document.getElementById('c-diff-items-list').innerHTML === "") addDivergenciaLinha();
+       } else {
+          fields.classList.add('hidden');
+          btnFull.className = "p-5 border-2 border-green-600 bg-green-50 rounded-2xl flex flex-col items-center gap-2 transition-all";
+          btnDiff.className = "p-5 border-2 border-slate-100 bg-white rounded-2xl flex flex-col items-center gap-2 transition-all";
+       }
+    }
+
+    function addDivergenciaLinha() {
+       const list = document.getElementById('c-diff-items-list');
+       const div = document.createElement('div');
+       div.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-3 relative animate-fadeIn item-diff-row";
+       div.innerHTML = `
+          <div><label class="text-[8px] font-black uppercase mb-1 block">SAP</label><input type="text" class="c-sap-item w-full bg-white border-slate-200 rounded-lg p-2 text-xs" placeholder="Opcional"></div>
+          <div><label class="text-[8px] font-black uppercase mb-1 block">Falta Vol.</label><input type="number" class="c-vol-item w-full bg-white border-slate-200 rounded-lg p-2 text-xs" placeholder="Qtd"></div>
+          <div><label class="text-[8px] font-black uppercase mb-1 block">Falta Peças</label><input type="number" class="c-pec-item w-full bg-white border-slate-200 rounded-lg p-2 text-xs" placeholder="Qtd"></div>
+          <button type="button" onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center border border-red-200 hover:bg-red-500 hover:text-white transition-colors shadow-sm"><span class="material-symbols-outlined text-sm">close</span></button>
+       `;
+       list.appendChild(div);
+    }
+
+    function abrirCheckinLote(id) {
+       const ids = id || Array.from(document.querySelectorAll('.chk-agendamento:checked')).map(cb => cb.value).join(',');
+       if(!ids) return notify('Erro', 'Nenhum agendamento selecionado', 'error');
+       
+       document.getElementById('c-ids').value = ids;
+       document.getElementById('c-diff-items-list').innerHTML = "";
+       selecionarTipoCheckin('FULL');
+       
+       if (!ids.includes(',')) {
+          const item = stateAgendamentos.find(x => x.id === ids);
+          if (item) document.getElementById('c-vols-rec').value = item.volumes;
+       } else {
+          document.getElementById('c-vols-rec').value = "";
+       }
+       
+       abrirModalGenerico('modal-checkin');
+    }
+
+    async function confirmarCheckin() {
+       const ids = document.getElementById('c-ids').value;
+       const type = document.getElementById('c-type').value;
+       
+       notify('Registrando...', 'Aguarde', 'info');
+       
+       try {
+         if (type === 'DIFF') {
+           const idArr = ids.split(',');
+           const item = stateAgendamentos.find(x => x.id === idArr[0]);
+           
+           const rows = document.querySelectorAll('.item-diff-row');
+           const itens = Array.from(rows).map(row => ({
+              sap: row.querySelector('.c-sap-item').value,
+              faltam_vols: Number(row.querySelector('.c-vol-item').value) || 0,
+              faltam_pecas: Number(row.querySelector('.c-pec-item').value) || 0
+           }));
+           
+           const vRec = Number(document.getElementById('c-vols-rec').value);
+           
+           const dados = {
+              volumes_recebidos: vRec,
+              itens: itens,
+              nf: item.notas_fiscais,
+              fornecedor: item.fornecedor,
+              data_real: new Date().toISOString()
+           };
+           
+           await gas('registrarCheckinComDivergencia', idArr[0], dados);
+         } else {
+           await gas('marcarRecebidosLote', ids);
+         }
+         
+         fecharModal('modal-checkin');
+         carregarDados();
+         notify('Sucesso', 'Recebimento registrado', 'success');
+       } catch (e) {
+         notify('Erro', 'Falha ao registrar: ' + e.message, 'error');
+       }
+    }
+
+    function abrirModalDia(ano, mes, d) {
+       document.getElementById('modal-dia-titulo').innerText = `${String(d).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}/${ano}`;
+       
+       const ents = stateAgendamentos.filter(i => {
+           let dt = parseSafeDate(i.data_agendada || i.data_real); 
+           return dt && dt.getDate() === d && dt.getMonth() === mes && dt.getFullYear() === ano;
+       });
+       
+       const lista = document.getElementById('modal-dia-lista');
+       lista.innerHTML = ents.map(i => {
+          const st = (i.status||'PENDENTE').toUpperCase();
+          const av = getAvatarStyle(i.fornecedor);
+          const vTotal = Number(i.volumes)||0;
+          const vRec = Number(i.vols_recebidos)||0;
+          const isConc = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes(st);
+          const diff = vTotal - vRec;
+
+          return `
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+               <div class="flex items-center gap-3 mb-3">
+                  <div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs">${av.initial}</div>
+                  <div class="flex-1">
+                     <h4 class="text-xs font-black text-slate-800">${i.fornecedor}</h4>
+                     <p class="text-[9px] text-outline font-mono">NF: ${i.notas_fiscais || '-'}</p>
+                  </div>
+                  <span class="text-[9px] font-black uppercase px-2 py-1 rounded bg-slate-50">${st}</span>
+               </div>
+               <div class="flex justify-between items-center text-[10px] font-black border-t border-slate-50 pt-3">
+                  <div class="flex gap-4">
+                     <div><span class="text-slate-400">PLAN:</span> ${vTotal}</div>
+                     <div class="${isConc && diff > 0 ? 'text-error' : 'text-primary'}"><span class="text-slate-400">REC:</span> ${isConc ? vRec : '—'}</div>
+                  </div>
+                  ${isConc && diff > 0 ? `
+                  <div class="bg-red-50 text-error px-2 py-1 rounded-lg flex items-center gap-1 animate-pulse">
+                     <span class="material-symbols-outlined text-[14px]">warning</span>
+                     FALTA ${diff} VOL
+                  </div>` : ''}
+               </div>
+            </div>
+          `;
+       }).join('');
+       
+       abrirModalGenerico('modal-dia');
+    }
+
+    async function excluir(id) { 
+        notify('Limpando...', 'Aguarde um momento', 'info'); 
+        await gas('excluirAlertaFlow', id); 
+        carregarDados(); 
+    }
+    
+    async function excluirTabela(id) { 
+        if(confirm('Tem certeza que deseja excluir permanentemente este registro?')) { 
+            notify('Excluindo...', 'Aguarde', 'warning'); 
+            await gas('excluirAlertaFlow', id); 
+            carregarDados(); 
+        } 
+    }
+
+    async function excluirDivergenciaMenu(index) {
+        if(confirm('⚠️ AVISO DE CONSEQUÊNCIAS:\nAo excluir este registro de divergência, você removerá permanentemente a evidência de conferência de faltas deste fornecedor. Esta ação não pode ser desfeita e afetará o histórico de auditoria e prestação de contas. Deseja prosseguir?')) {
+           notify('Excluindo...', 'Limpando registro', 'warning');
+           await gas('excluirDivergencia', index);
+           carregarDados();
+        }
+    }
+
+    function gerarTextoWpp() {
+      let a = new Date(); a.setDate(a.getDate() + 1);
+      const s = `${String(a.getDate()).padStart(2,'0')}/${String(a.getMonth()+1).padStart(2,'0')}`;
+      
+      const p = stateAgendamentos.filter(i => {
+          if(['RECEBIDO', 'CONCLUÍDO', 'CONCLUIDO', 'CANCELADO'].includes((i.status||'').toUpperCase())) return false;
+          const d = parseSafeDate(i.data_agendada || i.data_sugerida); 
+          if(!d) return false;
+          return d.getDate() === a.getDate() && d.getMonth() === a.getMonth() && d.getFullYear() === a.getFullYear();
+      });
+      
+      let t = `🧸 *Ri Happy Carioca | Agendamentos (${s})*\n\n`;
+      if(p.length === 0) { 
+          t += "Nenhuma entrega agendada para amanhã. 🙌"; 
+      } else { 
+          p.forEach(i => { t += `📦 *${i.fornecedor}*\n└ NF: ${i.notas_fiscais || 'S/N'} | Vol: ${i.volumes || 0}\n\n`; }); 
+          t += `📊 *Resumo:* ${p.length} Fornecedor(es) | ${p.reduce((acc, curr) => acc + (Number(curr.volumes)||0), 0)} Volumes`; 
+      }
+      
+      document.getElementById('wpp-texto').value = t; 
+      abrirModalGenerico('modal-wpp');
+    }
+
+    function copiarWpp() {
+      const copyText = document.getElementById("wpp-texto");
+      copyText.select(); navigator.clipboard.writeText(copyText.value);
+      notify('Copiado!', 'Texto copiado com sucesso.', 'info');
+      fecharModal('modal-wpp');
+    }
+
+    function verificarDuplicatas() {
+      const notas = stateAgendamentos.map(a => a.notas_fiscais).filter(nf => nf && nf.trim() !== "" && nf !== "-");
+      const dupes = notas.filter((item, index) => notas.indexOf(item) !== index);
+      if(dupes.length > 0) notify('Atenção!', `NFs repetidas: ${[...new Set(dupes)].join(', ')}`, 'error'); 
+      else notify('OK', 'Nenhuma duplicada.', 'info');
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+    window.onload = () => {
+      // Inicializa com a aba pendentes
+      mudarAba('pendentes');
+      carregarDados(true);
+
+      // Sincronização automática em segundo plano a cada 60 segundos (1 minuto)
+      setInterval(() => {
+        carregarDados(false);
+      }, 60000);
+    };
+  </script>
+</body>
+</html>
