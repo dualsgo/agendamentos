@@ -529,8 +529,8 @@
       </div>
 
       <!-- VIEW: CALENDÁRIO -->
-      <div id="view-calendario" class="hidden w-full flex-1 flex-col pb-4 md:pb-8">
-         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full min-h-[400px]">
+      <div id="view-calendario" class="hidden w-full flex-1 flex-col pb-20 md:pb-8 overflow-y-auto custom-scrollbar">
+         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col shrink-0 min-h-[380px]">
             <div class="p-3 md:p-4 border-b border-slate-200 flex justify-between items-center shrink-0">
               <button type="button" onclick="mudarMesCalendario(-1)" class="p-2 text-slate-600 bg-slate-50 rounded-lg hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm md:text-base">chevron_left</span></button>
               <span id="mes-calendario" class="font-black text-primary uppercase text-sm md:text-lg tracking-wider">...</span>
@@ -540,13 +540,35 @@
                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-100 border border-blue-300"></span> Cap. Normal</span>
                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-red-100 border border-red-300"></span> Lotação Máxima</span>
             </div>
-            <div class="p-2 md:p-4 bg-slate-50/50 flex-1 overflow-y-auto custom-scrollbar">
-               <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 md:gap-2 auto-rows-fr h-full"></div>
+            <div class="p-2 md:p-4 bg-slate-50/50 flex-1">
+               <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 md:gap-2 auto-rows-fr"></div>
             </div>
+         </div>
+
+         <!-- Agenda do Mês para Dispositivos Móveis (Rolagem abaixo do Calendário) -->
+         <div class="md:hidden mt-6 space-y-3">
+            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+               <span class="material-symbols-outlined text-[16px] text-primary">calendar_month</span> Agenda Detalhada do Mês
+            </h3>
+            <div id="calendar-agenda-mob" class="space-y-3"></div>
          </div>
       </div>
 
     </section>
+  </div>
+
+  <!-- MODAL: DETALHES DO DIA DO CALENDÁRIO -->
+  <div id="modal-dia" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end md:items-center justify-center md:p-4 transition-opacity">
+    <div class="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-lg shadow-2xl modal-enter overflow-hidden flex flex-col max-h-[90vh]">
+       <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div>
+             <h3 id="modal-dia-titulo" class="text-base font-black text-slate-800">Entregas do Dia</h3>
+             <p id="modal-dia-sub" class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">Visão detalhada dos agendamentos</p>
+          </div>
+          <button type="button" onclick="fecharModal('modal-dia')" class="p-2 bg-white rounded-full text-slate-400 hover:text-slate-700 shadow-sm border border-slate-200"><span class="material-symbols-outlined text-[20px]">close</span></button>
+       </div>
+       <div id="modal-dia-lista" class="p-4 md:p-6 space-y-3 overflow-y-auto custom-scrollbar flex-1"></div>
+    </div>
   </div>
 
   <!-- BARRA DE AÇÕES EM LOTE -->
@@ -564,7 +586,11 @@
   <nav class="md:hidden bg-white border-t border-slate-200 fixed bottom-0 w-full z-50 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
     <div class="flex justify-around items-center h-[65px]">
       <button type="button" id="nav-pendentes" onclick="mudarAba('pendentes')" class="flex flex-col items-center justify-center w-full h-full text-primary transition-colors relative">
-        <span class="material-symbols-outlined text-[24px] mb-0.5">pending_actions</span><span class="text-[9px] font-black uppercase tracking-wider">Pendentes</span>
+        <div class="relative">
+           <span class="material-symbols-outlined text-[24px] mb-0.5">pending_actions</span>
+           <span id="nav-badge-mob" class="hidden absolute -top-1 -right-2 bg-red-600 text-white text-[9px] font-black min-w-[16px] h-4 rounded-full px-1 flex items-center justify-center animate-pulse shadow-sm">0</span>
+        </div>
+        <span class="text-[9px] font-black uppercase tracking-wider">Pendentes</span>
       </button>
       <button type="button" id="nav-recebidos" onclick="mudarAba('recebidos')" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-800 transition-colors">
         <span class="material-symbols-outlined text-[24px] mb-0.5">inventory_2</span><span class="text-[9px] font-black uppercase tracking-wider">Recebidos</span>
@@ -938,6 +964,17 @@
       const containerDesk = document.getElementById('flow-list-desk');
       const containerMob = document.getElementById('flow-list-mob');
       const wrapperMob = document.getElementById('flow-container-mob');
+      const mobBadge = document.getElementById('nav-badge-mob');
+
+      if (mobBadge) {
+        if (stateAlertas.length > 0) {
+           mobBadge.innerText = stateAlertas.length > 99 ? '99+' : stateAlertas.length;
+           mobBadge.classList.remove('hidden');
+        } else {
+           mobBadge.classList.add('hidden');
+        }
+      }
+
       if(document.getElementById('flow-count-desk')) document.getElementById('flow-count-desk').innerText = stateAlertas.length;
       if(document.getElementById('flow-count-col')) document.getElementById('flow-count-col').innerText = stateAlertas.length;
       if(document.getElementById('flow-count-mob')) document.getElementById('flow-count-mob').innerText = stateAlertas.length;
@@ -1181,6 +1218,108 @@
            </button>`;
        }
        grid.innerHTML = htmlStr;
+
+       // Renderizar Agenda Detalhada do Mês para Mobile abaixo do Grid
+       const containerAgendaMob = document.getElementById('calendar-agenda-mob');
+       if (containerAgendaMob) {
+          const comAgendamento = lista.filter(i => {
+             const dt = parseSafeDate(i.data_agendada || i.data_real);
+             return dt && dt.getMonth() === mes && dt.getFullYear() === ano;
+          });
+
+          if (comAgendamento.length === 0) {
+             containerAgendaMob.innerHTML = `<div class="bg-white p-6 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs font-bold shadow-sm">Nenhum agendamento para este mês. ✨</div>`;
+          } else {
+             const porDia = {};
+             comAgendamento.forEach(item => {
+                const dt = parseSafeDate(item.data_agendada || item.data_real);
+                const key = `${dt.getDate().toString().padStart(2, '0')}/${(dt.getMonth()+1).toString().padStart(2, '0')}/${dt.getFullYear()}`;
+                if (!porDia[key]) porDia[key] = [];
+                porDia[key].push(item);
+             });
+
+             let agendaHtml = '';
+             Object.keys(porDia).sort().forEach(dataKey => {
+                const itensDia = porDia[dataKey];
+                agendaHtml += `
+                   <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+                      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                         <span class="text-xs font-black text-primary uppercase flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">event</span> ${dataKey}</span>
+                         <span class="text-[9px] font-black text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">${itensDia.reduce((a,b)=>a+(Number(b.volumes)||0),0)} vols</span>
+                      </div>
+                      <div class="space-y-2">
+                         ${itensDia.map(i => {
+                            const av = getAvatarStyle(i.fornecedor);
+                            const st = (i.status||'PENDENTE').toUpperCase();
+                            const isRec = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes(st);
+                            return `
+                               <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                  <div class="flex items-center gap-2.5 overflow-hidden">
+                                     <div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-black text-xs shrink-0">${av.initial}</div>
+                                     <div class="overflow-hidden">
+                                        <h4 class="text-xs font-black text-slate-800 truncate">${i.fornecedor}</h4>
+                                        <p class="text-[10px] text-slate-500 font-mono">NF: ${i.notas_fiscais || '-'} • Vol: ${i.volumes || '-'}</p>
+                                     </div>
+                                  </div>
+                                  <span class="${isRec ? 'bg-green-100 text-green-700' : (st==='ATRASADO'?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700')} px-2 py-1 rounded text-[8px] font-black uppercase shrink-0">${st}</span>
+                               </div>
+                            `;
+                         }).join('')}
+                      </div>
+                   </div>
+                `;
+             });
+             containerAgendaMob.innerHTML = agendaHtml;
+          }
+       }
+    }
+
+    function abrirModalDia(ano, mes, d) {
+       const dataStr = `${String(d).padStart(2, '0')}/${String(mes+1).padStart(2, '0')}/${ano}`;
+       document.getElementById('modal-dia-titulo').innerText = `Entregas do Dia ${dataStr}`;
+       
+       const entregasDia = stateAgendamentos.filter(i => {
+          let dt = parseSafeDate(i.data_agendada || i.data_real);
+          if(!dt) return false;
+          return dt.getDate() === d && dt.getMonth() === mes && dt.getFullYear() === ano;
+       });
+
+       const totalVols = entregasDia.reduce((a,b)=>a+(Number(b.volumes)||0),0);
+       document.getElementById('modal-dia-sub').innerText = `${entregasDia.length} Agendamento(s) • Total: ${totalVols} Volumes`;
+
+       const listaEl = document.getElementById('modal-dia-lista');
+       if(entregasDia.length === 0) {
+          listaEl.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs font-bold">Nenhuma entrega agendada para este dia.</div>`;
+       } else {
+          listaEl.innerHTML = entregasDia.map(i => {
+             const av = getAvatarStyle(i.fornecedor);
+             const st = (i.status||'PENDENTE').toUpperCase();
+             const isRec = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes(st);
+             const realIdx = stateAgendamentos.findIndex(x => x.id === i.id);
+
+             return `
+                <div class="bg-white border border-slate-200 p-3.5 rounded-2xl shadow-sm flex flex-col gap-2.5">
+                   <div class="flex justify-between items-center">
+                      <div class="flex items-center gap-2.5 overflow-hidden">
+                         <div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-black text-xs shrink-0">${av.initial}</div>
+                         <div class="overflow-hidden">
+                            <h4 class="text-xs font-black text-slate-800 truncate">${i.fornecedor}</h4>
+                            <p class="text-[10px] text-slate-500 font-mono">NF: ${i.notas_fiscais || '-'} • Vol: ${i.volumes || '-'}</p>
+                         </div>
+                      </div>
+                      <span class="${isRec ? 'bg-green-100 text-green-700' : (st==='ATRASADO'?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700')} px-2 py-1 rounded text-[8px] font-black uppercase shrink-0">${st}</span>
+                   </div>
+                   
+                   <div class="flex gap-2 pt-2 border-t border-slate-100">
+                      ${!isRec ? `<button type="button" onclick="abrirCheckinLote('${i.id}'); fecharModal('modal-dia')" class="flex-1 py-2 bg-green-600 text-white rounded-xl text-[9px] font-black uppercase shadow-sm flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[13px]">task_alt</span> Baixa</button>` : ''}
+                      <button type="button" onclick="fecharModal('modal-dia'); abrirModal(stateAgendamentos[${realIdx}], false)" class="flex-1 py-2 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-[9px] font-black uppercase flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[13px]">edit</span> Editar</button>
+                      <button type="button" onclick="window.open('https://mail.google.com/mail/u/0/#all/' + '${i.id}', '_blank')" class="py-2 px-3 bg-white border border-slate-200 text-primary rounded-xl text-[9px] font-black uppercase flex items-center justify-center"><span class="material-symbols-outlined text-[13px]">mail</span></button>
+                   </div>
+                </div>
+             `;
+          }).join('');
+       }
+       abrirModalGenerico('modal-dia');
     }
 
     // ============================================================
