@@ -951,6 +951,10 @@ function doPost(e) {
       payload = excluirDivergencia(args[0]);
     } else if (action === 'salvarSettings') {
       payload = salvarSettings(args[0]);
+    } else if (action === 'aprovarLote') {
+      payload = aprovarLote(args[0]);
+    } else if (action === 'responderEmail') {
+      payload = responderEmail(args[0], args[1]);
     } else if (action === 'getTodosOsDados') {
       payload = getTodosOsDados();
     } else if (action === 'getSettings') {
