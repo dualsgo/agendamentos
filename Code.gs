@@ -311,7 +311,6 @@ function getTodosOsDados() {
       if (registro) {
         registrosConsolidados.push(registro);
       }
-      idsParaGravar.push([id]);
     }
 
     // Processa linhas sem ID (gerar novos IDs)
@@ -320,17 +319,16 @@ function getTodosOsDados() {
       if (registro) {
         registrosConsolidados.push(registro);
       }
-      idsParaGravar.push([item.id]);
       precisaGravar = true;
     }
 
     // 3. Se houver IDs novos para gravar
-    if (precisaGravar && idsParaGravar.length > 0) {
-      // Atualiza apenas as linhas que precisam de ID
-      for (let i = 0; i < idsParaGravar.length; i++) {
-        const rowIndex = i + 2; // +2 por causa do cabeçalho e 0-based
-        sheet.getRange(rowIndex, 9).setValue(idsParaGravar[i][0]);
+    if (precisaGravar && linhasSemId.length > 0) {
+      for (const item of linhasSemId) {
+        const rowIndex = item.index + 2;
+        sheet.getRange(rowIndex, 9).setValue(item.id);
       }
+      SpreadsheetApp.flush();
     }
 
     // 4. Separa entre alertas e agendamentos baseado no status
@@ -695,8 +693,9 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
       }
     } else {
       const dataFormatada = Utilities.formatDate(dtAgendada, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      const dataCriacao = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
       const rowData = [
-        "", dados.fornecedor, dados.notas_fiscais, dados.volumes,
+        dataCriacao, dados.fornecedor, dados.notas_fiscais, dados.volumes,
         dataFormatada, dados.observacoes, dados.status || "PENDENTE", "Formulário Web", idUnico, dados.remetente || "", dados.assunto || "", dados.vols_recebidos || 0, dados.resumo_direto || ""
       ];
       sheet.appendRow(rowData);

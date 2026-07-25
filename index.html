@@ -716,16 +716,27 @@
       
       try {
         let clean = s.split(' ')[0].split('T')[0];
+        let timePart = s.includes(' ') ? s.split(' ')[1] : (s.includes('T') ? s.split('T')[1].split('.')[0] : null);
+        
+        let hours = 0, minutes = 0, seconds = 0;
+        if (timePart) {
+           const tParts = timePart.split(':');
+           if (tParts.length >= 2) {
+              hours = Number(tParts[0]);
+              minutes = Number(tParts[1]);
+              if (tParts[2]) seconds = Number(tParts[2].replace('Z',''));
+           }
+        }
         
         if (clean.includes('/')) {
           const parts = clean.split('/'); 
-          if (parts.length === 3) res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]));
+          if (parts.length === 3) res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]), hours, minutes, seconds);
         }
         else if (clean.includes('-')) {
           const parts = clean.split('-');
           if (parts.length === 3) {
-            if (parts[0].length === 4) res = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
-            else res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]));
+            if (parts[0].length === 4) res = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]), hours, minutes, seconds);
+            else res = new Date(Number(parts[2]), Number(parts[1])-1, Number(parts[0]), hours, minutes, seconds);
           }
         }
         else {
@@ -1022,7 +1033,7 @@
       stateAlertas.forEach((item, index) => {
         const info = processarObservacao(item);
         const uniqueId = item.id || `card-${index}`;
-        const urgencia = calcularTempoEurgencia(item.data_real || item.data_agendada); 
+        const urgencia = calcularTempoEurgencia(item.data_real); 
         const dtStr = formatarDataHumanizada(item.data_sugerida);
         const avatar = getAvatarStyle(item.fornecedor);
         const cardBody = (isMobView) => `
@@ -1698,7 +1709,7 @@
          } else {
              notify('Sucesso', 'Salvo com sucesso!', 'info');
          }
-         carregarDados();
+         setTimeout(() => carregarDados(), 1000);
        } catch(e) { notify('Erro', 'Falha ao salvar. Tente novamente.', 'error'); }
     });
 
