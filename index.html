@@ -304,6 +304,9 @@
                 <button type="button" onclick="fecharModal('modal-agendamento')" class="p-2 bg-slate-100 rounded-full hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
              </div>
 
+             <!-- Contexto & Resumo da IA para Celulares -->
+             <div id="email-context-view-mob" class="md:hidden mb-4"></div>
+
              <div class="space-y-5">
                 <div>
                    <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Data Prevista de Entrega</label>
@@ -1258,6 +1261,7 @@
       const f = document.getElementById('form-agendamento'); 
       if(f) f.reset();
       const context = document.getElementById('email-context-view');
+      const contextMob = document.getElementById('email-context-view-mob');
       
       if (item) {
         document.getElementById('modal-title').innerText = isFlow ? 'Agendar Entrega' : 'Editar Agendamento';
@@ -1284,26 +1288,29 @@
         if(document.getElementById('f-obs-mob')) document.getElementById('f-obs-mob').value = obsVal;
         
         if (isFlow) {
-           if(context) context.innerHTML = `
-             <div class="bg-white p-4 rounded-xl border border-slate-200">
+           const contextHtml = `
+             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Tipo da Solicitação:</p>
                 <span class="${cardInfo.badgeClass} px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider inline-block">${cardInfo.badge}</span>
              </div>
-             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Resumo Direto:</p>
                 <p class="text-xs font-bold leading-relaxed text-slate-800">${item.resumo_direto || item.observacoes || 'N/A'}</p>
              </div>
-             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Remetente:</p>
                 <p class="text-xs font-medium break-all text-slate-700">${item.remetente || 'N/A'}</p>
              </div>
-             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3">
+             <div class="bg-white p-4 rounded-xl border border-slate-200 mt-3 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Assunto:</p>
                 <p class="text-xs font-medium text-slate-600">${item.assunto || 'N/A'}</p>
              </div>
            `;
+           if(context) context.innerHTML = contextHtml;
+           if(contextMob) contextMob.innerHTML = contextHtml;
         } else {
            if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Edição Manual</p>';
+           if(contextMob) contextMob.innerHTML = '';
         }
       } else {
         document.getElementById('modal-title').innerText = 'Novo Agendamento'; 
@@ -1314,6 +1321,7 @@
         document.getElementById('f-status').value = 'PENDENTE';
         document.getElementById('f-status-select').value = 'PENDENTE';
         if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Novo Agendamento Manual</p>';
+        if(contextMob) contextMob.innerHTML = '';
       }
       abrirModalGenerico('modal-agendamento');
     }
