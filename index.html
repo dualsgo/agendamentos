@@ -780,28 +780,30 @@
        const d = parseSafeDate(dataStr);
        if (!d) return { text: 'Aguardando resposta', badgeClass: 'bg-slate-100 text-slate-600 border border-slate-200', icon: 'schedule' }; 
        
-       const now = new Date();
-       const diffMs = now - d;
-       const diffMin = Math.floor(diffMs / 60000); 
-
-       if (diffMin <= 0) {
-          return { text: 'Chegou agora', badgeClass: 'bg-blue-50 text-blue-700 border border-blue-200 font-bold', icon: 'schedule' };
+       const dia = String(d.getDate()).padStart(2, '0');
+       const mes = String(d.getMonth() + 1).padStart(2, '0');
+       const horas = String(d.getHours()).padStart(2, '0');
+       const minutos = String(d.getMinutes()).padStart(2, '0');
+       
+       if (horas === '00' && minutos === '00') {
+           return { text: `Recebido em ${dia}/${mes}`, badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200 font-bold', icon: 'event' };
        }
-       if (diffMin < 60) {
-          return { text: `Aguardando há ${diffMin} min`, badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200 font-bold', icon: 'schedule' };
+       
+       const diffMs = new Date() - d;
+       const diffHoras = Math.floor(diffMs / 3600000);
+       
+       let badgeClass = 'bg-slate-100 text-slate-700 border border-slate-200 font-bold';
+       let icon = 'schedule';
+       
+       if (diffHoras >= 24) {
+           badgeClass = 'bg-red-100 text-red-800 border border-red-300 font-black shadow-sm';
+           icon = 'error';
+       } else if (diffHoras >= 4) {
+           badgeClass = 'bg-amber-100 text-amber-900 border border-amber-300 font-black shadow-sm';
+           icon = 'warning';
        }
-       const h = Math.floor(diffMin / 60);
-       const minRest = diffMin % 60;
-       if (h < 24) {
-          const txt = minRest > 0 ? `Aguardando há ${h}h ${minRest}m` : `Aguardando há ${h}h`;
-          if (h >= 4) {
-             return { text: `⚠️ ${txt}`, badgeClass: 'bg-amber-100 text-amber-900 border border-amber-300 font-black animate-pulse shadow-sm', icon: 'warning' };
-          }
-          return { text: txt, badgeClass: 'bg-slate-100 text-slate-800 border border-slate-200 font-bold', icon: 'schedule' };
-       }
-       const dias = Math.floor(h / 24);
-       const txtDias = dias === 1 ? `Aguardando há 1 dia` : `Aguardando há ${dias} dias`;
-       return { text: `🚨 ${txtDias}`, badgeClass: 'bg-red-100 text-red-800 border border-red-300 font-black animate-pulse shadow-sm', icon: 'error' };
+       
+       return { text: `Recebido em ${dia}/${mes} às ${horas}:${minutos}`, badgeClass, icon };
     }
 
     const getAvatarStyle = (nome) => {
