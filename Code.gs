@@ -52,7 +52,7 @@ function formatarDataStudio(valorData) {
   if (!valorData) return "";
 
   if (valorData instanceof Date) {
-    return Utilities.formatDate(valorData, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    return Utilities.formatDate(valorData, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
   }
 
   let str = String(valorData).trim();
@@ -88,7 +88,7 @@ function formatarDataStudio(valorData) {
 
   const parsedDate = new Date(str);
   if (!isNaN(parsedDate.getTime())) {
-    return Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    return Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
   }
 
   return str;
