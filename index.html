@@ -1132,7 +1132,7 @@
        const diasNoMes = new Date(ano, mes + 1, 0).getDate();
        const primeiroDia = new Date(ano, mes, 1).getDay();
        let htmlStr = '';
-       ['DOM','SEG','TER','QUA','QUI','SEX','SAB'].forEach(d => htmlStr += `<div class="bg-white py-2 text-center text-[10px] font-black text-slate-400 border-b border-slate-200">${d}</div>`);
+       ['DOM','SEG','TER','QUA','QUI','SEX','SAB'].forEach(d => htmlStr += `<div class="bg-white py-1 md:py-2 text-center text-[8px] sm:text-[10px] font-black text-slate-400 border-b border-slate-200">${d}</div>`);
        for(let i = 0; i < primeiroDia; i++) htmlStr += `<div class="bg-slate-50/50"></div>`;
        for(let d = 1; d <= diasNoMes; d++) {
            const itemDate = new Date(ano, mes, d);
@@ -1175,7 +1175,7 @@
               else { bg = 'bg-white'; }
            } else {
               bg = vols_agendados > settings.limite_vols ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-100';
-              if (hasMismatch) extraClass = 'dotted-alert border-[3px] !border-error !z-10 shadow-lg';
+              if (hasMismatch) extraClass = 'dotted-alert border-[2px] md:border-[3px] !border-error !z-10 shadow-lg';
                if (hasMismatch) opacity = 'opacity-100';
                if (isPast && !hasMismatch) opacity = 'opacity-40 grayscale-[0.3]';
            }
@@ -1189,31 +1189,27 @@
            if(isBlackout) { bg = 'bg-slate-900 text-white'; opacity = 'opacity-100'; extraClass = ''; }
 
            htmlStr += `
-           <button type="button" onclick="${isBlackout ? "notify('Bloqueado', 'Inventário Geral', 'warning')" : `if(${vols_agendados}>0) abrirModalDia(${ano},${mes},${d})`}" class="w-full ${bg} ${opacity} ${extraClass} relative border-b border-r border-slate-200 p-1 md:p-2 min-h-[70px] md:min-h-[100px] flex flex-col justify-center items-center cursor-pointer active:scale-95 transition-transform hover:shadow-inner">
-             <span class="absolute top-1 md:top-2 right-1.5 md:right-2 text-[9px] md:text-[11px] font-bold opacity-30">${d}</span>
+           <button type="button" onclick="${isBlackout ? "notify('Bloqueado', 'Inventário Geral', 'warning')" : `if(${vols_agendados}>0) abrirModalDia(${ano},${mes},${d})`}" class="w-full ${bg} ${opacity} ${extraClass} relative border-b border-r border-slate-200 p-0.5 sm:p-1 md:p-2 min-h-[52px] sm:min-h-[70px] md:min-h-[100px] flex flex-col justify-center items-center cursor-pointer active:scale-95 transition-transform hover:shadow-inner overflow-hidden">
+             <span class="absolute top-0.5 sm:top-1 right-1 text-[8px] sm:text-[10px] md:text-[11px] font-extrabold opacity-40">${d}</span>
              
-             ${isBlackout ? `<span class="material-symbols-outlined text-[16px] mb-1">block</span><span class="text-[7px] font-black uppercase">Inventário</span>` : ''}
+             ${isBlackout ? `<span class="material-symbols-outlined text-[13px] md:text-[18px] mb-0.5">block</span><span class="text-[6px] sm:text-[8px] font-black uppercase tracking-tighter">Bloqueio</span>` : ''}
              
-             ${!isBlackout && vols_agendados === 0 && isFuture && !isWeekend ? `<div class="bg-green-600 text-white p-1 rounded-md mb-1"><span class="text-[8px] font-black uppercase leading-none block">Disponível</span></div>` : ''}
+             ${!isBlackout && vols_agendados === 0 && isFuture && !isWeekend ? `<div class="bg-green-600 text-white px-1 py-0.5 rounded text-[6px] sm:text-[8px] font-black uppercase leading-none">Livre</div>` : ''}
              
               ${!isBlackout && isAfterOverload && vols_agendados === 0 ? 
-                `<div class="bg-amber-600 border border-amber-700 p-1 rounded-md animate-pulse shadow-sm">
-                  <span class="text-[7px] font-black text-white uppercase leading-none block text-center tracking-tighter">
-                    Organizar<br>Estoque
-                  </span>
+                `<div class="bg-amber-600 text-white px-0.5 sm:px-1 py-0.5 rounded animate-pulse">
+                  <span class="text-[6px] sm:text-[7px] font-black uppercase leading-none block text-center tracking-tighter">Organizar</span>
                 </div>` : ''}
 
               ${!isBlackout && dayOfWeek === 6 && !isAfterOverload ? 
-                `<div class="bg-slate-800 p-1 rounded-md">
-                  <span class="text-[7px] font-black text-white uppercase leading-tight text-center block tracking-tighter">
-                    Organizar<br>Estoque
-                  </span>
+                `<div class="bg-slate-800 text-white px-0.5 sm:px-1 py-0.5 rounded">
+                  <span class="text-[6px] sm:text-[7px] font-black uppercase leading-none block text-center tracking-tighter">Estoque</span>
                 </div>` : ''}
              
              ${!isBlackout && vols_agendados > 0 ? `
-                <span class="text-xl md:text-2xl font-black leading-none ${hasMismatch ? 'text-error' : ''}">${vols_recebidos < vols_agendados ? vols_recebidos + '<span class="text-[10px] mx-0.5 opacity-40">de</span>' + vols_agendados : vols_agendados}</span>
-                <span class="text-[7px] md:text-[9px] font-bold uppercase opacity-50 mt-1">${vols_recebidos < vols_agendados ? 'Volumes Rec.' : 'Total Vol'}</span>
-                ${hasMismatch ? `<span class="material-symbols-outlined text-error text-[14px] mt-1">warning</span>` : ''}
+                <span class="text-xs sm:text-lg md:text-2xl font-black leading-none ${hasMismatch ? 'text-error' : ''}">${vols_recebidos < vols_agendados ? vols_recebidos + '<span class="text-[8px] sm:text-[10px] mx-0.5 opacity-40">/</span>' + vols_agendados : vols_agendados}</span>
+                <span class="text-[6px] sm:text-[8px] md:text-[9px] font-bold uppercase opacity-60 mt-0.5 truncate max-w-full">${vols_recebidos < vols_agendados ? 'Rec.' : 'Vols'}</span>
+                ${hasMismatch ? `<span class="material-symbols-outlined text-error text-[11px] md:text-[14px] mt-0.5">warning</span>` : ''}
              ` : ''}
            </button>`;
        }
