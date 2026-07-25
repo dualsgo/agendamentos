@@ -4,8 +4,8 @@ const NOME_ABA = "Agenda";
 // Configurações centralizadas
 const CONFIG = {
   LIMITE_VOLS_PADRAO: 1000,
-  STATUS_VALIDOS: ['PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'RECEBIDO', 'CANCELADO', 'EM TRATATIVA', 'ALTERACAO_SOLICITADA'],
-  STATUS_NOTIFICACAO: ['PENDENTE', 'ALTERACAO_SOLICITADA'],
+  STATUS_VALIDOS: ['PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'CANCELADO', 'EM TRATATIVA'],
+  STATUS_NOTIFICACAO: ['PENDENTE', 'EM TRATATIVA'],
   STATUS_CONFIRMADO: ['CONFIRMADO'],
   COLUNAS: {
     DATA_REAL: 1,
@@ -341,7 +341,7 @@ function getTodosOsDados() {
       const statusAtual = registro.status;
       
       // Lógica de classificação baseada no status
-      if (statusAtual === 'PENDENTE' || statusAtual === 'ALTERACAO_SOLICITADA') {
+      if (statusAtual === 'PENDENTE' || statusAtual === 'EM TRATATIVA') {
         alertas.push(registro);
       } else if (statusAtual === 'CONFIRMADO') {
         agendamentos.push(registro);
@@ -520,7 +520,7 @@ function confirmarAgendamento(rowIndex, dataConfirmada) {
 }
 
 function solicitarAlteracaoData(rowIndex, novaDataSugerida) {
-  return atualizarStatusAgendamento(rowIndex, 'ALTERACAO_SOLICITADA', novaDataSugerida);
+  return atualizarStatusAgendamento(rowIndex, 'EM TRATATIVA', novaDataSugerida);
 }
 
 // ==================== FUNÇÕES DE OPERAÇÕES EXISTENTES ====================
@@ -635,10 +635,43 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
       if (dados.assunto) updateData.assunto = dados.assunto;
       if (dados.resumo_direto) updateData.resumo_direto = dados.resumo_direto;
       
+      const currentData = sheet.getRange(targetRow, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const mapeamento = {
+        'status': 7,
+        'data_agendada': 5,
+        'data_sugerida': 5,
+        'observacoes': 6,
+        'observacao': 6,
+        'volumes': 4,
+        'notas_fiscais': 3,
+        'fornecedor': 2,
+        'remetente': 10,
+        'assunto': 11,
+        'vols_recebidos': 12,
+        'resumo_direto': 13
+      };
+      
       for (const [campo, valor] of Object.entries(updateData)) {
         if (valor !== undefined && valor !== null && valor !== '') {
-          const result = atualizarAgendamento(targetRow, { [campo]: valor });
-          if (result !== 'OK') return result;
+          if (campo in mapeamento) {
+            const coluna = mapeamento[campo];
+            let valorFinal = valor;
+            let valorAntigo = currentData[coluna - 1] || '';
+            
+            if (campo === 'data_agendada' || campo === 'data_sugerida') {
+              const dataObj = parseSafeDate(valor);
+              if (dataObj) {
+                valorFinal = Utilities.formatDate(dataObj, Session.getScriptTimeZone(), "dd/MM/yyyy");
+              }
+              valorAntigo = formatarDataStudio(valorAntigo);
+            }
+            
+            if (String(valorAntigo) !== String(valor)) {
+              registrarAlteracao(targetRow, campo, valorAntigo, valor, 'Sistema');
+            }
+            
+            sheet.getRange(targetRow, coluna).setValue(valorFinal);
+          }
         }
       }
     } else {
@@ -754,6 +787,50 @@ function marcarRecebidosLote(idsStr, dataRealString) {
     return "OK - " + processados + " processados";
   } catch (e) { 
     logAcao('marcarRecebidosLote', { idsStr }, 'ERRO: ' + e.message);
+    return "ERRO INTERNO: " + e.message; 
+  } finally { lock.releaseLock(); }
+}
+
+function aprovarLote(idsStr) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    const sheet = inicializarPlanilha();
+    const data = sheet.getDataRange().getValues();
+    
+    let idsArray = [];
+    try {
+      idsArray = JSON.parse(idsStr);
+    } catch (e) {
+      idsArray = idsStr.split(",");
+    }
+    
+    let processados = 0;
+    
+    for (let id of idsArray) {
+      let targetRow = getTargetRow(id, data);
+      if (targetRow > -1) {
+        const currentData = sheet.getRange(targetRow, 1, 1, sheet.getLastColumn()).getValues()[0];
+        const oldStatus = currentData[6] || 'PENDENTE';
+        let suggestedDate = currentData[4];
+        
+        // Se a data de agendamento não for válida, e tivermos que definir
+        if (!suggestedDate) {
+           suggestedDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy");
+           sheet.getRange(targetRow, 5).setValue(suggestedDate);
+        }
+        
+        sheet.getRange(targetRow, 7).setValue("CONFIRMADO");
+        registrarAlteracao(targetRow, 'status', oldStatus, 'CONFIRMADO', 'Aprovação Lote');
+        
+        processados++;
+      }
+    }
+    SpreadsheetApp.flush();
+    logAcao('aprovarLote', { total: idsArray.length, processados }, 'OK');
+    return "OK - " + processados + " processados";
+  } catch (e) { 
+    logAcao('aprovarLote', { idsStr }, 'ERRO: ' + e.message);
     return "ERRO INTERNO: " + e.message; 
   } finally { lock.releaseLock(); }
 }

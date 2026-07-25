@@ -312,6 +312,7 @@
                    <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Data Prevista de Entrega</label>
                    <input type="date" id="f-data" required class="w-full border-slate-200 rounded-xl p-4 font-bold text-sm focus:ring-primary focus:border-primary shadow-sm">
                    <p id="f-warning" class="text-[10px] text-error font-black mt-2 hidden flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Capacidade máxima atingida!</p>
+                   <div id="f-capacity-indicator" class="mt-3 grid grid-cols-3 gap-2"></div>
                 </div>
                 
                 <div>
@@ -336,7 +337,6 @@
                       <option value="PENDENTE">Pendente</option>
                       <option value="CONFIRMADO">Confirmado</option>
                       <option value="EM TRATATIVA">Em Tratativa</option>
-                      <option value="ATRASADO">Atrasado</option>
                       <option value="CANCELADO">Cancelado</option>
                       <option value="CONCLUÍDO">Concluído</option>
                    </select>
@@ -409,6 +409,9 @@
              <span id="flow-count-desk" class="bg-error text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow-sm">0</span>
           </div>
           <div class="flex items-center gap-1.5 ml-auto">
+             <button type="button" id="btn-aprovar-lote-desk" onclick="aprovarAlertasSelecionados()" class="hidden p-1.5 bg-green-100 text-green-700 border border-green-200 rounded-xl hover:bg-green-200 transition-all flex items-center justify-center active:scale-95 shadow-sm" title="Aprovar Selecionados">
+                <span class="material-symbols-outlined text-[18px]">done_all</span>
+             </button>
              <button type="button" onclick="carregarDados(true)" title="Sincronizar com a Planilha" class="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-500 hover:text-primary transition-all flex items-center justify-center active:scale-95 shadow-sm">
                 <span class="material-symbols-outlined text-[18px] sync-icon">refresh</span>
              </button>
@@ -438,9 +441,14 @@
             <h2 class="text-sm font-black text-slate-800 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">mail</span> Caixa de Entrada</h2>
             <span id="flow-count-mob" class="bg-error text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm">0</span>
           </div>
-          <button type="button" onclick="carregarDados(true)" title="Sincronizar" class="p-1.5 bg-white border border-slate-200 rounded-xl text-slate-600 active:scale-95 shadow-sm flex items-center justify-center">
-            <span class="material-symbols-outlined text-[16px] sync-icon">refresh</span>
-          </button>
+          <div class="flex gap-2">
+            <button type="button" id="btn-aprovar-lote-mob" onclick="aprovarAlertasSelecionados()" class="hidden p-1.5 bg-green-100 text-green-700 border border-green-200 rounded-xl active:scale-95 shadow-sm flex items-center justify-center">
+               <span class="material-symbols-outlined text-[16px]">done_all</span>
+            </button>
+            <button type="button" onclick="carregarDados(true)" title="Sincronizar" class="p-1.5 bg-white border border-slate-200 rounded-xl text-slate-600 active:scale-95 shadow-sm flex items-center justify-center">
+              <span class="material-symbols-outlined text-[16px] sync-icon">refresh</span>
+            </button>
+          </div>
         </div>
         <div id="flow-list-mob" class="flex overflow-x-auto hide-scrollbar gap-4 pb-4 snap-x w-full"></div>
       </div>
@@ -993,9 +1001,12 @@
         const avatar = getAvatarStyle(item.fornecedor);
         const cardBody = (isMobView) => `
           <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <span class="${urgencia.badgeClass} px-2.5 py-1 rounded-md text-[9px] uppercase tracking-wider flex items-center gap-1">
-               <span class="material-symbols-outlined text-[13px]">${urgencia.icon}</span> ${urgencia.text}
-            </span>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" value="${uniqueId}" onchange="atualizarBotaoAprovarLote()" class="chk-alerta w-4 h-4 rounded text-green-600 border-slate-300">
+              <span class="${urgencia.badgeClass} px-2.5 py-1 rounded-md text-[9px] uppercase tracking-wider flex items-center gap-1">
+                 <span class="material-symbols-outlined text-[13px]">${urgencia.icon}</span> ${urgencia.text}
+              </span>
+            </div>
             <span class="${info.badgeClass} px-2 py-1 rounded-md text-[8px] font-extrabold uppercase tracking-wider">${info.badge}</span>
           </div>
 
@@ -1458,6 +1469,7 @@
         if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Novo Agendamento Manual</p>';
         if(contextMob) contextMob.innerHTML = '';
       }
+      atualizarTermometroCapacidade(document.getElementById('f-data').value);
       abrirModalGenerico('modal-agendamento');
     }
 
@@ -1471,7 +1483,10 @@
     }
 
     document.getElementById('f-data').addEventListener('change', (e) => {
-       const val = e.target.value;
+       atualizarTermometroCapacidade(e.target.value);
+    });
+
+    function atualizarTermometroCapacidade(val) {
        if(!val) return;
        const d = parseSafeDate(val);
        if(!d) return;
@@ -1483,12 +1498,78 @@
        
        const warnEl = document.getElementById('f-warning');
        if(volsDia >= settings.limite_vols) {
-          notify('Atenção', 'Este dia já atingiu ou superou a capacidade máxima de recebimento.', 'warning');
           if(warnEl) warnEl.classList.remove('hidden');
        } else {
           if(warnEl) warnEl.classList.add('hidden');
        }
-    });
+       
+       const capacityContainer = document.getElementById('f-capacity-indicator');
+       if (capacityContainer) {
+          let htmlCapacity = '';
+          for (let i = 0; i < 3; i++) {
+             const diaAlvo = new Date(d);
+             diaAlvo.setDate(diaAlvo.getDate() + i);
+             const vols = stateAgendamentos.filter(ag => {
+                 let dt = parseSafeDate(ag.data_agendada || ag.data_real); 
+                 return dt && dt.getDate() === diaAlvo.getDate() && dt.getMonth() === diaAlvo.getMonth() && dt.getFullYear() === diaAlvo.getFullYear();
+             }).reduce((a, b) => a + (Number(b.volumes)||0), 0);
+             
+             const isLotado = vols >= settings.limite_vols;
+             
+             let dateStr = "Selecionado";
+             if (i === 1) {
+                const amanha = new Date(); amanha.setHours(0,0,0,0); amanha.setDate(amanha.getDate() + 1);
+                if (diaAlvo.getTime() === amanha.getTime()) dateStr = "Amanhã";
+                else dateStr = `+${i} dia`;
+             } else if (i === 2) {
+                dateStr = `+${i} dias`;
+             }
+             
+             htmlCapacity += `
+                <div class="bg-slate-50 border ${isLotado ? 'border-red-300' : 'border-slate-200'} rounded-lg py-1.5 px-1 text-center flex flex-col justify-center shadow-sm">
+                   <span class="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-tighter truncate w-full">${dateStr}</span>
+                   <span class="text-xs font-black ${isLotado ? 'text-error' : 'text-primary'} leading-none mt-1">${vols} <span class="text-[7px] font-bold opacity-60">vol</span></span>
+                </div>
+             `;
+          }
+          capacityContainer.innerHTML = htmlCapacity;
+       }
+    }
+
+    function atualizarBotaoAprovarLote() {
+       const checked = document.querySelectorAll('.chk-alerta:checked').length;
+       const btnDesk = document.getElementById('btn-aprovar-lote-desk');
+       const btnMob = document.getElementById('btn-aprovar-lote-mob');
+       if (checked > 0) {
+           if(btnDesk) btnDesk.classList.remove('hidden');
+           if(btnMob) btnMob.classList.remove('hidden');
+       } else {
+           if(btnDesk) btnDesk.classList.add('hidden');
+           if(btnMob) btnMob.classList.add('hidden');
+       }
+    }
+
+    async function aprovarAlertasSelecionados() {
+       const checked = Array.from(document.querySelectorAll('.chk-alerta:checked')).map(cb => cb.value);
+       if(checked.length === 0) return;
+       if(!confirm(`Deseja aprovar e confirmar ${checked.length} agendamento(s)?\nA data atual da solicitação será utilizada.`)) return;
+       
+       notify('Aprovando...', 'Aguarde', 'info');
+       try {
+         const idsStr = checked.join(',');
+         const result = await gas('aprovarLote', idsStr);
+         if(result.includes('ERRO')) {
+            notify('Erro', result, 'error');
+         } else {
+            notify('Sucesso', 'Lote aprovado com sucesso!', 'success');
+            document.querySelectorAll('.chk-alerta:checked').forEach(cb => cb.checked = false);
+            atualizarBotaoAprovarLote();
+            carregarDados();
+         }
+       } catch(e) {
+         notify('Erro', 'Falha ao aprovar lote', 'error');
+       }
+    }
 
     document.getElementById('form-agendamento').addEventListener('submit', async (e) => {
        e.preventDefault();
