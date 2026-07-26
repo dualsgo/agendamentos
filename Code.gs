@@ -122,11 +122,33 @@ function parseSafeDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-function getTargetRow(id, data) {
-  const searchId = String(id).trim();
-  for (let i = 1; i < data.length; i++) { 
-    if (String(data[i][8]).trim() === searchId) return i + 1; 
+function normalizarAssunto(assunto) {
+  if (!assunto) return "";
+  let a = String(assunto).trim().toLowerCase();
+  a = a.replace(/^(\s*(re|res|fwd|enc|fw|resposta)\s*:)+\s*/ig, '');
+  return a.trim();
+}
+
+function getTargetRow(id, data, assunto = "") {
+  if (id) {
+    const searchId = String(id).trim();
+    for (let i = 1; i < data.length; i++) { 
+      if (String(data[i][8]).trim() === searchId) return i + 1; 
+    }
   }
+  
+  if (assunto) {
+    const assuntoLimpo = normalizarAssunto(assunto);
+    if (assuntoLimpo.length > 5) {
+      for (let i = data.length - 1; i >= 1; i--) {
+        const assuntoLinha = normalizarAssunto(data[i][10]);
+        if (assuntoLinha && assuntoLinha === assuntoLimpo) {
+          return i + 1;
+        }
+      }
+    }
+  }
+  
   return -1;
 }
 
@@ -624,7 +646,7 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
     const sheet = inicializarPlanilha();
     const data = sheet.getDataRange().getValues();
     
-    let targetRow = getTargetRow(dados.id, data);
+    let targetRow = getTargetRow(dados.id, data, dados.assunto);
     const idUnico = dados.id || Utilities.getUuid();
     
     let dtAgendada = null;
@@ -674,6 +696,12 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
             const coluna = mapeamento[campo];
             let valorFinal = valor;
             let valorAntigo = currentData[coluna - 1] || '';
+            
+            const strValor = String(valorFinal).trim().toUpperCase();
+            if ((strValor === "N/I" || strValor === "N/A" || strValor === "NÃO INFORMADO") && 
+                valorAntigo !== undefined && valorAntigo !== null && valorAntigo !== '' && String(valorAntigo).trim().toUpperCase() !== "N/I") {
+              continue; // Ignora sobrescrita de valores válidos por "N/I"
+            }
             
             if (campo === 'data_agendada' || campo === 'data_sugerida') {
               const dataObj = parseSafeDate(valor);
