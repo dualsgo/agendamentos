@@ -1499,12 +1499,12 @@
         }
       } else {
         document.getElementById('modal-title').innerText = 'Novo Agendamento'; 
-        document.getElementById('f-id').value = '';
+        document.getElementById('f-id').value = 'MANUAL_' + new Date().getTime();
         document.getElementById('f-resumo-direto').value = '';
         document.getElementById('f-row-index').value = '';
         document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('f-status').value = 'PENDENTE';
-        document.getElementById('f-status-select').value = 'PENDENTE';
+        document.getElementById('f-status').value = 'CONFIRMADO';
+        document.getElementById('f-status-select').value = 'CONFIRMADO';
         if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Novo Agendamento Manual</p>';
         if(contextMob) contextMob.innerHTML = '';
       }

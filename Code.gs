@@ -646,8 +646,9 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
     const sheet = inicializarPlanilha();
     const data = sheet.getDataRange().getValues();
     
-    let targetRow = getTargetRow(dados.id, data, dados.assunto);
-    const idUnico = dados.id || Utilities.getUuid();
+    const providedId = dados.id || dados.email_id || dados.id_email || dados.message_id || "";
+    let targetRow = getTargetRow(providedId, data, dados.assunto);
+    const idUnico = providedId || Utilities.getUuid();
     
     let dtAgendada = null;
     if (dados.data_agendada) {
@@ -722,9 +723,32 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
     } else {
       const dataFormatada = Utilities.formatDate(dtAgendada, Session.getScriptTimeZone(), "dd/MM/yyyy");
       const dataCriacao = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+      
+      let origemText = "Formulário Web";
+      if (idUnico && String(idUnico).startsWith("MANUAL_")) {
+          origemText = "Agendamento Manual";
+      } else if (dados.origem) {
+          origemText = dados.origem;
+      } else if (dados.remetente || dados.assunto) {
+          origemText = "Automação / E-mail";
+      }
+
+      const statusInicial = dados.status || (origemText === "Agendamento Manual" ? "CONFIRMADO" : "PENDENTE");
+
       const rowData = [
-        dataCriacao, dados.fornecedor, dados.notas_fiscais, dados.volumes,
-        dataFormatada, dados.observacoes, dados.status || "PENDENTE", "Formulário Web", idUnico, dados.remetente || "", dados.assunto || "", dados.vols_recebidos || 0, dados.resumo_direto || ""
+        dataCriacao, 
+        dados.fornecedor || "Não Informado", 
+        dados.notas_fiscais || "S/N", 
+        dados.volumes || 0,
+        dataFormatada, 
+        dados.observacoes || "", 
+        statusInicial, 
+        origemText, 
+        idUnico, 
+        dados.remetente || (origemText === "Agendamento Manual" ? "Manual" : ""), 
+        dados.assunto || (origemText === "Agendamento Manual" ? "Agendamento Criado Manualmente" : ""), 
+        dados.vols_recebidos || 0, 
+        dados.resumo_direto || ""
       ];
       sheet.appendRow(rowData);
     }
