@@ -137,9 +137,10 @@ function getTargetRow(id, data, assunto = "") {
     }
   }
   
-  if (assunto) {
+  if (assunto && (!id || !String(id).startsWith("MANUAL_"))) {
     const assuntoLimpo = normalizarAssunto(assunto);
-    if (assuntoLimpo.length > 5) {
+    const ignorarAssuntos = ["agendamento criado manualmente", "agendamento manual"];
+    if (assuntoLimpo.length > 5 && !ignorarAssuntos.includes(assuntoLimpo)) {
       for (let i = data.length - 1; i >= 1; i--) {
         const assuntoLinha = normalizarAssunto(data[i][10]);
         if (assuntoLinha && assuntoLinha === assuntoLimpo) {
