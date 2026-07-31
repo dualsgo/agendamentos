@@ -96,12 +96,12 @@ function formatarDataStudio(valorData) {
 
 function parseSafeDate(str) {
   if (!str || str === "—") return null;
-  let s = String(str).trim();
+  let s = String(str).replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
   
   const formats = [
-    { regex: /^(\d{2})\/(\d{2})\/(\d{4})$/, map: (d,m,y) => new Date(y, m-1, d) },
-    { regex: /^(\d{4})-(\d{2})-(\d{2})$/, map: (y,m,d) => new Date(y, m-1, d) },
-    { regex: /^(\d{2})-(\d{2})-(\d{4})$/, map: (d,m,y) => new Date(y, m-1, d) }
+    { regex: /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+\d{2}:\d{2}:\d{2})?$/, map: (d,m,y) => new Date(y, m-1, d) },
+    { regex: /^(\d{4})-(\d{2})-(\d{2})(?:\s+\d{2}:\d{2}:\d{2})?$/, map: (y,m,d) => new Date(y, m-1, d) },
+    { regex: /^(\d{2})-(\d{2})-(\d{4})(?:\s+\d{2}:\d{2}:\d{2})?$/, map: (d,m,y) => new Date(y, m-1, d) }
   ];
   
   for (const format of formats) {
@@ -115,7 +115,15 @@ function parseSafeDate(str) {
   
   const dataFormatada = formatarDataStudio(s);
   if (dataFormatada && dataFormatada !== s) {
-    return parseSafeDate(dataFormatada);
+    // Evita recursão infinita checando diretamente com os formatos
+    for (const format of formats) {
+      const match = dataFormatada.match(format.regex);
+      if (match) {
+        const [, ...parts] = match.map(Number);
+        const date = format.map(...parts);
+        return isNaN(date.getTime()) ? null : date;
+      }
+    }
   }
   
   const d = new Date(s);
@@ -435,7 +443,7 @@ function criarRegistro(linha, rowIndex, id) {
 // ==================== FUNÇÕES DE LIMPEZA DE DUPLICATAS ====================
 
 /**
- * Função para limpar registros duplicados (pode ser executada manualmente)
+ * Função para limpar registros duplicados, preservando dados manuais das linhas antigas
  */
 function limparDuplicatas() {
   const lock = LockService.getScriptLock();
@@ -453,8 +461,9 @@ function limparDuplicatas() {
     
     const idsMap = new Map();
     const linhasParaRemover = [];
+    let atualizacoes = 0;
     
-    // Identifica duplicatas (primeira passagem)
+    // Identifica duplicatas
     for (let i = 1; i < data.length; i++) {
       const linha = data[i];
       const id = linha[8] ? String(linha[8]).trim() : "";
@@ -471,9 +480,34 @@ function limparDuplicatas() {
       if (indices.length > 1) {
         // Ordena do mais antigo para o mais novo
         indices.sort((a, b) => a - b);
-        // Remove todos exceto o último (mais recente)
+        const indiceMaisRecente = indices[indices.length - 1];
+        const linhaMaisRecente = data[indiceMaisRecente];
+        
+        // Mesclar dados das antigas para a nova antes de deletar
         for (let j = 0; j < indices.length - 1; j++) {
-          linhasParaRemover.push(indices[j] + 1); // +1 porque é 1-based
+          const idxAntigo = indices[j];
+          const linhaAntiga = data[idxAntigo];
+          
+          // Preservar Volumes Recebidos (col 12, index 11)
+          if (linhaAntiga[11] && !linhaMaisRecente[11]) {
+             sheet.getRange(indiceMaisRecente + 1, 12).setValue(linhaAntiga[11]);
+             linhaMaisRecente[11] = linhaAntiga[11];
+             atualizacoes++;
+          }
+          // Preservar Observações (col 6, index 5) se a nova estiver vazia
+          if (linhaAntiga[5] && !linhaMaisRecente[5]) {
+             sheet.getRange(indiceMaisRecente + 1, 6).setValue(linhaAntiga[5]);
+             linhaMaisRecente[5] = linhaAntiga[5];
+             atualizacoes++;
+          }
+          // Preservar Data Agendada/Sugerida (col 5, index 4) se a nova for N/I ou vazia
+          if (linhaAntiga[4] && (!linhaMaisRecente[4] || String(linhaMaisRecente[4]).toUpperCase() === "N/I")) {
+             sheet.getRange(indiceMaisRecente + 1, 5).setValue(linhaAntiga[4]);
+             linhaMaisRecente[4] = linhaAntiga[4];
+             atualizacoes++;
+          }
+          
+          linhasParaRemover.push(idxAntigo + 1); // +1 porque é 1-based
         }
       }
     }
@@ -486,8 +520,10 @@ function limparDuplicatas() {
       removidos++;
     }
     
-    SpreadsheetApp.flush();
-    logAcao('limparDuplicatas', {}, `Removidos ${removidos} registros duplicados`);
+    if (removidos > 0 || atualizacoes > 0) {
+       SpreadsheetApp.flush();
+       logAcao('limparDuplicatas', {}, `Removidos ${removidos} duplicatas. ${atualizacoes} dados preservados.`);
+    }
     return `OK - ${removidos} duplicatas removidas`;
   } catch (e) {
     logAcao('limparDuplicatas', {}, 'ERRO: ' + e.message);
@@ -495,6 +531,56 @@ function limparDuplicatas() {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ==================== GATILHOS E AUTOMAÇÕES (ONCHANGE / DAILY) ====================
+
+/**
+ * Função executada automaticamente sempre que a planilha sofrer uma alteração
+ * Configuraremos para rodar em inserções (INSERT_ROW / EDIT)
+ */
+function onPlanilhaChange(e) {
+  // Se o evento foi disparado por deleção de linha, ignoramos para não entrar em loop infinito
+  if (e && e.changeType) {
+    if (e.changeType === 'REMOVE_ROW' || e.changeType === 'REMOVE_COLUMN' || e.changeType === 'FORMAT') {
+      return;
+    }
+  }
+  
+  // Chama a limpeza de duplicatas (que consolida os IDs mantendo o mais recente)
+  limparDuplicatas();
+}
+
+/**
+ * Função utilitária para criar os gatilhos no Google Apps Script.
+ * Basta rodar essa função uma vez no Editor de Scripts.
+ */
+function configurarGatilhos() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error("Execute esta função no arquivo vinculado à planilha.");
+  
+  // Limpa gatilhos antigos para não duplicar
+  const triggers = ScriptApp.getProjectTriggers();
+  for (const trigger of triggers) {
+    if (trigger.getHandlerFunction() === 'onPlanilhaChange' || trigger.getHandlerFunction() === 'limparDuplicatas') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  }
+  
+  // 1. Cria Gatilho OnChange (Para o Gmail Studio)
+  ScriptApp.newTrigger('onPlanilhaChange')
+    .forSpreadsheet(ss)
+    .onChange()
+    .create();
+    
+  // 2. Cria Gatilho Diário (Backup na Madrugada - 2h da manhã)
+  ScriptApp.newTrigger('limparDuplicatas')
+    .timeBased()
+    .atHour(2)
+    .everyDays(1)
+    .create();
+    
+  console.log("Gatilhos configurados com sucesso! O sistema agora se auto-limpará.");
 }
 
 // ==================== FUNÇÕES DE ATUALIZAÇÃO DE STATUS ====================
