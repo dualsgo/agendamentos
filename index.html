@@ -516,7 +516,7 @@
                        <th class="px-6 py-4">Fornecedor</th>
                        <th class="px-6 py-4">Nota Fiscal</th>
                        <th class="px-6 py-4 text-center">Volumes</th>
-                       <th class="px-6 py-4">Status</th>
+                       <th class="px-6 py-4 text-center">Contato</th>
                        <th class="px-6 py-4 text-right">Ações</th>
                     </tr>
                  </thead>
@@ -538,8 +538,6 @@
                        <th class="px-6 py-4">Fornecedor</th>
                        <th class="px-6 py-4">Nota Fiscal</th>
                        <th class="px-6 py-4 text-center">Vol</th>
-                       <th class="px-6 py-4">Observações</th>
-                       <th class="px-6 py-4">Status</th>
                        <th class="px-6 py-4 text-right">Ações</th>
                     </tr>
                  </thead>
@@ -1087,6 +1085,9 @@
           if(arr.length === 0) return `<div class="text-center py-10 text-slate-400 text-sm font-bold bg-white rounded-2xl border border-slate-200 shadow-sm">Nada por aqui!</div>`;
           return arr.map(i => {
              let st = (i.status||'PENDENTE').toUpperCase(); 
+             const hoje = new Date(); hoje.setHours(0,0,0,0);
+             const dtObj = parseSafeDate(isRec ? i.data_real : (i.data_agendada || i.data_sugerida));
+             if (!isRec && dtObj && dtObj < hoje && st !== 'CANCELADO') st = 'ATRASADO';
              let badge = st === 'ATRASADO' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'; 
              let realIdx = stateAgendamentos.findIndex(x => x.id === i.id); 
              const av = getAvatarStyle(i.fornecedor); 
@@ -1105,9 +1106,12 @@
        };
        
        const rDesk = (arr, isRec) => {
-          if(arr.length === 0) return `<tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Tabela vazia.</td></tr>`;
+           if(arr.length === 0) return `<tr><td colspan="${isRec ? 5 : 7}" class="text-center py-10 text-slate-400 font-bold">Tabela vazia.</td></tr>`;
           return arr.map((i, idx) => {
              let st = (i.status||'PENDENTE').toUpperCase();
+             const hoje = new Date(); hoje.setHours(0,0,0,0);
+             const dtObj = parseSafeDate(isRec ? i.data_real : (i.data_agendada || i.data_sugerida));
+             if (!isRec && dtObj && dtObj < hoje && st !== 'CANCELADO') st = 'ATRASADO';
              let realIdx = stateAgendamentos.findIndex(x => x.id === i.id); 
              const av = getAvatarStyle(i.fornecedor); 
              const dt = formatarDataHumanizada(isRec ? i.data_real : i.data_agendada);
@@ -1116,27 +1120,20 @@
              let row = `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">`;
              if (!isRec) row += `<td class="px-5 py-4 text-center"><input type="checkbox" value="${i.id}" onchange="atualizarBotaoLote()" class="chk-agendamento rounded text-green-600 cursor-pointer border-slate-300 focus:ring-green-600 w-4 h-4"></td>`;
              row += `<td class="px-6 py-4 font-black ${dt==='Hoje'||dt==='Amanhã' ? 'text-primary' : 'text-slate-700'}">${dt}</td><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs shrink-0 ${isRec?'grayscale opacity-50':''}">${av.initial}</div><span class="font-black text-slate-800 ${isRec?'line-through decoration-slate-300':''}">${i.fornecedor}</span></td><td class="px-6 py-4 text-outline font-mono text-xs">#${i.notas_fiscais || '-'}</td><td class="px-6 py-4 text-center font-black">${i.volumes || '-'}</td>`;
-             if (!isRec) row += `<td class="px-6 py-4">${getStatusBadge(st)}</td>`; else row += `<td class="px-6 py-4"><span class="status-badge status-concluido">Concluído</span></td>`;
+             if (!isRec) {
+                const mailUrl = (i.id && i.id.length > 5 && !i.id.startsWith('ROW_')) ? `https://mail.google.com/mail/u/0/#all/${i.id.trim()}` : '#';
+                const mailClick = mailUrl !== '#' ? `window.open('${mailUrl}', '_blank')` : `notify('Aviso', 'Sem e-mail vinculado', 'warning')`;
+                row += `<td class="px-6 py-4 text-center"><button type="button" onclick="${mailClick}" title="Ver no Gmail" class="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg flex items-center justify-center transition-colors mx-auto"><span class="material-symbols-outlined text-[18px]">mail</span></button></td>`;
+             }
              
-             // Ações com dropdown
              row += `<td class="px-6 py-4 text-right"><div class="flex justify-end gap-1.5">`;
              
              if (!isRec) {
-               // Dropdown de ações
-               row += `<div class="actions-dropdown relative">`;
-               row += `<button type="button" onclick="toggleDropdown(this)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-400 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>`;
-               row += `<div class="actions-dropdown-content">`;
-               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'CONFIRMADO')"><span class="material-symbols-outlined text-green-600">check_circle</span> Confirmar</button>`;
-               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'EM TRATATIVA')"><span class="material-symbols-outlined text-amber-600">pending</span> Em Tratativa</button>`;
-               row += `<button onclick="atualizarStatusUI(${rowIdx}, 'CANCELADO')"><span class="material-symbols-outlined text-red-600">cancel</span> Cancelar</button>`;
-               row += `<button onclick="abrirModalData(${rowIdx})"><span class="material-symbols-outlined text-purple-600">event</span> Alterar Data</button>`;
-               row += `</div></div>`;
-               
-               row += `<button type="button" onclick="abrirCheckinLote('${i.id}')" title="Baixa" class="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">task_alt</span></button>`;
+               row += `<button type="button" onclick="abrirCheckinLote('${i.id}')" title="Confirmar Recebimento" class="w-8 h-8 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">task_alt</span></button>`;
              }
              
-             row += `<button type="button" onclick="abrirModal(stateAgendamentos[${realIdx}], false)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-400 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>`;
-             row += `<button type="button" onclick="excluirTabela('${i.id}')" class="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+             row += `<button type="button" onclick="abrirModal(stateAgendamentos[${realIdx}], false)" title="Editar Agendamento" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 rounded-lg text-slate-400 flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>`;
+             row += `<button type="button" onclick="excluirTabela('${i.id}')" title="Deletar Registro" class="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
              row += `</div></td></tr>`;
              return row;
           }).join('');
