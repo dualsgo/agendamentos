@@ -59,7 +59,7 @@
 
     /* SIDEBAR COLLAPSE LOGIC */
     .sidebar-transition { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .sidebar-expanded { width: 380px !important; }
+    .sidebar-expanded { width: 420px !important; }
     .sidebar-collapsed { width: 80px !important; padding-left: 12px !important; padding-right: 12px !important; }
     .sidebar-expanded .collapsed-only { display: none !important; }
     .sidebar-collapsed .expanded-only { display: none !important; }
@@ -386,40 +386,16 @@
     </div>
   </div>
 
-  <!-- HEADER -->
-  <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-2.5 flex justify-between items-center shrink-0 z-30 shadow-sm relative">
+  <!-- HEADER (Mobile Only) -->
+  <header class="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex justify-between items-center shrink-0 z-30 shadow-sm relative">
     <div class="flex items-center gap-3">
-      <button type="button" onclick="toggleSidebar()" class="hidden md:flex p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-primary transition-colors items-center justify-center">
-         <span id="sidebar-icon" class="material-symbols-outlined">menu_open</span>
-      </button>
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
-      <div class="hidden lg:flex flex-col border-l border-slate-200 pl-4 ml-2">
-        <span class="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Carioca</span>
-        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Estoque</span>
-      </div>
     </div>
-    
-    <!-- KPIs Centralizados -->
-    <div class="hidden md:flex items-center gap-6">
-       <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ativos:</span>
-          <span id="kpi-ativos-desk" class="text-sm font-black text-slate-800">0</span>
-       </div>
-       <div class="w-px h-4 bg-slate-200"></div>
-       <div class="flex items-center gap-2">
-          <div class="w-2 h-2 rounded-full bg-error shadow-[0_0_8px_rgba(227,0,15,0.4)]"></div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atrasados:</span>
-          <span id="kpi-atraso-desk" class="text-sm font-black text-error">0</span>
-       </div>
-    </div>
-    
-    <div class="flex items-center gap-2 md:gap-3">
-       <button type="button" onclick="abrirModalGenerico('modal-help')" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">help</span></button>
-       <button type="button" onclick="abrirSettings()" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">settings</span></button>
-       <button type="button" onclick="gerarTextoWpp()" class="w-9 h-9 bg-[#25D366]/10 rounded-full flex items-center justify-center text-[#25D366] hover:bg-[#25D366]/20 transition-colors"><span class="material-symbols-outlined text-[18px]">chat</span></button>
-       <button type="button" onclick="abrirModal()" class="w-9 h-9 md:w-auto md:px-4 md:py-2 bg-primary text-white rounded-full md:rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-xs flex items-center justify-center active:scale-95">
-         <span class="material-symbols-outlined text-[20px] md:mr-1.5">add</span> <span class="hidden md:inline">Agendar</span>
+    <div class="flex items-center gap-3">
+       <button type="button" onclick="gerarTextoWpp()" class="w-9 h-9 bg-[#25D366]/10 rounded-full flex items-center justify-center text-[#25D366]"><span class="material-symbols-outlined text-[18px]">chat</span></button>
+       <button type="button" onclick="abrirSettings()" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[18px]">settings</span></button>
+       <button type="button" onclick="abrirModal()" class="w-9 h-9 bg-primary text-white rounded-full shadow-md shadow-primary/30 font-bold flex items-center justify-center active:scale-95">
+         <span class="material-symbols-outlined text-[20px]">add</span>
        </button>
     </div>
   </header>
@@ -429,6 +405,35 @@
     
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar-expanded hidden md:flex flex-col border-r border-slate-200 py-6 px-4 h-full bg-white shrink-0 z-10 sidebar-transition custom-scrollbar shadow-[4px_0_24px_-10px_rgba(0,0,0,0.05)]">
+       
+       <!-- Brand e Ações Globais (Desktop) -->
+       <div class="flex flex-col gap-6 mb-8 shrink-0 pb-6 border-b border-slate-100">
+          <div class="flex items-center justify-between expanded-only px-2">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
+             <button type="button" onclick="toggleSidebar()" title="Minimizar Menu" class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-primary transition-colors flex items-center justify-center">
+                <span id="sidebar-icon" class="material-symbols-outlined">menu_open</span>
+             </button>
+          </div>
+          
+          <div class="flex items-center gap-2 expanded-only px-2">
+             <button type="button" onclick="abrirModal()" class="flex-1 py-3 bg-primary text-white rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-[13px] flex items-center justify-center active:scale-95">
+               <span class="material-symbols-outlined text-[20px] mr-1.5">add</span> Agendar
+             </button>
+             <button type="button" onclick="gerarTextoWpp()" class="w-11 h-11 bg-[#25D366]/10 rounded-xl flex items-center justify-center text-[#25D366] hover:bg-[#25D366]/20 transition-colors" title="Copiar Texto WhatsApp"><span class="material-symbols-outlined text-[20px]">chat</span></button>
+             <button type="button" onclick="abrirSettings()" class="w-11 h-11 border border-slate-200 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 hover:text-primary transition-colors" title="Configurações"><span class="material-symbols-outlined text-[20px]">settings</span></button>
+          </div>
+          
+          <!-- Visão Colapsada -->
+          <div class="flex flex-col items-center gap-4 collapsed-only w-full px-1">
+             <button type="button" onclick="toggleSidebar()" class="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-primary transition-colors flex items-center justify-center w-full">
+                <span class="material-symbols-outlined">menu</span>
+             </button>
+             <button type="button" onclick="abrirModal()" class="w-full aspect-square bg-primary text-white rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-xs flex items-center justify-center active:scale-95 mt-2">
+               <span class="material-symbols-outlined text-[20px]">add</span>
+             </button>
+          </div>
+       </div>
+
        <div class="flex items-center justify-between mb-4 px-2 shrink-0">
           <div class="flex items-center gap-2 expanded-only">
              <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2"><span class="material-symbols-outlined text-tertiary">mail</span> Caixa de Entrada</h2>
