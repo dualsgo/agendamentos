@@ -1111,19 +1111,27 @@
              let st = (i.status||'PENDENTE').toUpperCase();
              const hoje = new Date(); hoje.setHours(0,0,0,0);
              const dtObj = parseSafeDate(isRec ? i.data_real : (i.data_agendada || i.data_sugerida));
-             if (!isRec && dtObj && dtObj < hoje && st !== 'CANCELADO') st = 'ATRASADO';
+             let isAtrasado = (!isRec && dtObj && dtObj < hoje && st !== 'CANCELADO');
              let realIdx = stateAgendamentos.findIndex(x => x.id === i.id); 
              const av = getAvatarStyle(i.fornecedor); 
              const dt = formatarDataHumanizada(isRec ? i.data_real : i.data_agendada);
              const rowIdx = i.rowIndex || 0;
              
-             let row = `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">`;
+             let dateColor = 'text-slate-700';
+             if (dt === 'Hoje' || dt === 'Amanhã') dateColor = 'text-primary';
+             else if (isAtrasado) dateColor = 'text-red-600';
+
+             let row = `<tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 ${isAtrasado ? 'bg-red-50/20' : ''}">`;
              if (!isRec) row += `<td class="px-5 py-4 text-center"><input type="checkbox" value="${i.id}" onchange="atualizarBotaoLote()" class="chk-agendamento rounded text-green-600 cursor-pointer border-slate-300 focus:ring-green-600 w-4 h-4"></td>`;
-             row += `<td class="px-6 py-4 font-black ${dt==='Hoje'||dt==='Amanhã' ? 'text-primary' : 'text-slate-700'}">${dt}</td><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs shrink-0 ${isRec?'grayscale opacity-50':''}">${av.initial}</div><span class="font-black text-slate-800 ${isRec?'line-through decoration-slate-300':''}">${i.fornecedor}</span></td><td class="px-6 py-4 text-outline font-mono text-xs">#${i.notas_fiscais || '-'}</td><td class="px-6 py-4 text-center font-black">${i.volumes || '-'}</td>`;
+             row += `<td class="px-6 py-4 font-black ${dateColor}"><div class="flex items-center gap-2">${dt} ${isAtrasado ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-700 uppercase tracking-widest font-black">Atrasado</span>' : ''}</div></td><td class="px-6 py-4 flex items-center gap-3"><div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs shrink-0 ${isRec?'grayscale opacity-50':''}">${av.initial}</div><span class="font-black text-slate-800 ${isRec?'line-through decoration-slate-300':''}">${i.fornecedor}</span></td><td class="px-6 py-4 text-outline font-mono text-xs">#${i.notas_fiscais || '-'}</td><td class="px-6 py-4 text-center font-black">${i.volumes || '-'}</td>`;
              if (!isRec) {
-                const mailUrl = (i.id && i.id.length > 5 && !i.id.startsWith('ROW_')) ? `https://mail.google.com/mail/u/0/#all/${i.id.trim()}` : '#';
-                const mailClick = mailUrl !== '#' ? `window.open('${mailUrl}', '_blank')` : `notify('Aviso', 'Sem e-mail vinculado', 'warning')`;
-                row += `<td class="px-6 py-4 text-center"><button type="button" onclick="${mailClick}" title="Ver no Gmail" class="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg flex items-center justify-center transition-colors mx-auto"><span class="material-symbols-outlined text-[18px]">mail</span></button></td>`;
+                const isManual = !i.id || i.id.length <= 5 || i.id.startsWith('ROW_') || i.id.startsWith('MANUAL_');
+                if (!isManual) {
+                   const mailUrl = `https://mail.google.com/mail/u/0/#all/${i.id.trim()}`;
+                   row += `<td class="px-6 py-4 text-center"><button type="button" onclick="window.open('${mailUrl}', '_blank')" title="Ver no Gmail" class="w-8 h-8 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg flex items-center justify-center transition-colors mx-auto"><span class="material-symbols-outlined text-[18px]">mail</span></button></td>`;
+                } else {
+                   row += `<td class="px-6 py-4 text-center"><span class="text-slate-300 font-bold" title="Agendamento Manual">—</span></td>`;
+                }
              }
              
              row += `<td class="px-6 py-4 text-right"><div class="flex justify-end gap-1.5">`;
