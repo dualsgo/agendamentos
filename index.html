@@ -190,6 +190,40 @@
     </div>
   </div>
 
+  <!-- MODAL DE CONFIRMAÇÃO CUSTOMIZADO (SUBSTITUI CONFIRM NATIVO) -->
+  <div id="modal-custom-confirm" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99990] flex items-center justify-center p-4 transition-opacity">
+    <div id="modal-confirm-card" class="bg-white rounded-3xl w-full max-w-sm shadow-2xl modal-enter border-t-8 border-primary p-6 text-center">
+      <div id="modal-confirm-icon-bg" class="w-14 h-14 bg-red-100 text-error rounded-full flex items-center justify-center mx-auto mb-4">
+        <span id="modal-confirm-icon" class="material-symbols-outlined text-3xl">warning</span>
+      </div>
+      <h2 id="modal-confirm-title" class="text-lg font-black text-slate-800 mb-1">Confirmação</h2>
+      <p id="modal-confirm-msg" class="text-xs text-slate-500 font-medium mb-6 leading-relaxed">Deseja prosseguir?</p>
+      
+      <div class="flex gap-3">
+        <button type="button" id="modal-confirm-btn-cancel" class="flex-1 py-3.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 font-bold text-xs uppercase hover:bg-slate-200 active:scale-95 transition-all">Cancelar</button>
+        <button type="button" id="modal-confirm-btn-ok" class="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold text-xs uppercase shadow-lg shadow-primary/30 active:scale-95 transition-all">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE INPUT/PROMPT CUSTOMIZADO (SUBSTITUI PROMPT NATIVO) -->
+  <div id="modal-custom-prompt" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99990] flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl modal-enter border-t-8 border-blue-600 p-6 text-center">
+      <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-3xl">edit_calendar</span>
+      </div>
+      <h2 id="modal-prompt-title" class="text-lg font-black text-slate-800 mb-1">Informe a Data</h2>
+      <p id="modal-prompt-msg" class="text-xs text-slate-500 font-medium mb-4 leading-relaxed">Selecione uma nova data:</p>
+      
+      <input type="date" id="modal-prompt-input" class="w-full border-slate-200 rounded-2xl p-3 text-sm font-bold focus:ring-blue-600 focus:border-blue-600 mb-6 bg-slate-50 shadow-inner">
+
+      <div class="flex gap-3">
+        <button type="button" id="modal-prompt-btn-cancel" class="flex-1 py-3.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 font-bold text-xs uppercase hover:bg-slate-200 active:scale-95 transition-all">Cancelar</button>
+        <button type="button" id="modal-prompt-btn-ok" class="flex-1 py-3.5 rounded-xl bg-blue-600 text-white font-bold text-xs uppercase shadow-lg shadow-blue-600/30 active:scale-95 transition-all">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAIS EXISTENTES (mantidos) -->
   <div id="modal-atraso" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
     <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl modal-enter border-t-8 border-error flex flex-col max-h-[90vh]">
@@ -760,6 +794,101 @@
         overlay.classList.remove('opacity-100', 'pointer-events-auto');
         overlay.classList.add('opacity-0', 'pointer-events-none');
       }
+    }
+
+    function customConfirm({
+      titulo = "Confirmação",
+      mensagem = "Deseja realmente prosseguir com esta ação?",
+      textoConfirmar = "Confirmar",
+      textoCancelar = "Cancelar",
+      tipo = "danger",
+      icone = "warning"
+    }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-custom-confirm');
+        const titleEl = document.getElementById('modal-confirm-title');
+        const msgEl = document.getElementById('modal-confirm-msg');
+        const iconEl = document.getElementById('modal-confirm-icon');
+        const iconBg = document.getElementById('modal-confirm-icon-bg');
+        const btnConfirm = document.getElementById('modal-confirm-btn-ok');
+        const btnCancel = document.getElementById('modal-confirm-btn-cancel');
+        const cardBorder = document.getElementById('modal-confirm-card');
+
+        titleEl.innerText = titulo;
+        msgEl.innerHTML = mensagem;
+        iconEl.innerText = icone;
+
+        if (tipo === 'danger') {
+          iconBg.className = "w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4";
+          cardBorder.style.borderTopColor = "#dc2626";
+          btnConfirm.className = "flex-1 py-3.5 rounded-xl bg-red-600 text-white font-bold text-xs uppercase shadow-lg shadow-red-600/30 hover:bg-red-700 active:scale-95 transition-all";
+        } else if (tipo === 'warning') {
+          iconBg.className = "w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4";
+          cardBorder.style.borderTopColor = "#d97706";
+          btnConfirm.className = "flex-1 py-3.5 rounded-xl bg-amber-600 text-white font-bold text-xs uppercase shadow-lg shadow-amber-600/30 hover:bg-amber-700 active:scale-95 transition-all";
+        } else {
+          iconBg.className = "w-14 h-14 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4";
+          cardBorder.style.borderTopColor = "#E3000F";
+          btnConfirm.className = "flex-1 py-3.5 rounded-xl bg-primary text-white font-bold text-xs uppercase shadow-lg shadow-primary/30 hover:bg-primary-hover active:scale-95 transition-all";
+        }
+
+        btnConfirm.innerText = textoConfirmar;
+        btnCancel.innerText = textoCancelar;
+
+        const cleanup = (value) => {
+          modal.classList.add('hidden');
+          btnConfirm.onclick = null;
+          btnCancel.onclick = null;
+          resolve(value);
+        };
+
+        btnConfirm.onclick = () => cleanup(true);
+        btnCancel.onclick = () => cleanup(false);
+
+        modal.classList.remove('hidden');
+      });
+    }
+
+    function customPrompt({
+      titulo = "Informe o valor",
+      mensagem = "Preencha a informação abaixo:",
+      inputType = "date",
+      defaultValue = "",
+      placeholder = "",
+      textoConfirmar = "Confirmar",
+      textoCancelar = "Cancelar"
+    }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-custom-prompt');
+        const titleEl = document.getElementById('modal-prompt-title');
+        const msgEl = document.getElementById('modal-prompt-msg');
+        const inputEl = document.getElementById('modal-prompt-input');
+        const btnConfirm = document.getElementById('modal-prompt-btn-ok');
+        const btnCancel = document.getElementById('modal-prompt-btn-cancel');
+
+        titleEl.innerText = titulo;
+        msgEl.innerHTML = mensagem;
+        inputEl.type = inputType;
+        inputEl.value = defaultValue;
+        if (placeholder) inputEl.placeholder = placeholder;
+
+        const cleanup = (value) => {
+          modal.classList.add('hidden');
+          btnConfirm.onclick = null;
+          btnCancel.onclick = null;
+          resolve(value);
+        };
+
+        btnConfirm.onclick = () => {
+          const val = inputEl.value;
+          cleanup(val || null);
+        };
+
+        btnCancel.onclick = () => cleanup(null);
+
+        modal.classList.remove('hidden');
+        setTimeout(() => inputEl.focus(), 100);
+      });
     }
 
     function abrirModalGenerico(id) { 
@@ -1469,7 +1598,14 @@
         return;
       }
       
-      if (!confirm(`Deseja alterar o status para "${novoStatus}"?`)) return;
+      const ok = await customConfirm({
+        titulo: "Alterar Status",
+        mensagem: `Deseja realmente alterar o status deste agendamento para <strong>"${novoStatus}"</strong>?`,
+        textoConfirmar: "Sim, Alterar",
+        tipo: "primary",
+        icone: "edit_note"
+      });
+      if (!ok) return;
       
       mostrarLoading("Atualizando Status...", `Alterando status para "${novoStatus}"...`, "edit");
       try {
@@ -1493,7 +1629,12 @@
         return;
       }
       
-      const novaData = prompt('Informe a nova data (AAAA-MM-DD):');
+      const novaData = await customPrompt({
+        titulo: "Alterar Data Agendada",
+        mensagem: "Escolha a nova data para a entrega:",
+        inputType: "date",
+        textoConfirmar: "Salvar Data"
+      });
       if (!novaData) return;
       
       if (!novaData.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -1730,7 +1871,15 @@
     async function aprovarAlertasSelecionados() {
        const checked = Array.from(document.querySelectorAll('.chk-alerta:checked')).map(cb => cb.value);
        if(checked.length === 0) return;
-       if(!confirm(`Deseja aprovar e confirmar ${checked.length} agendamento(s)?\nA data atual da solicitação será utilizada.`)) return;
+       
+       const ok = await customConfirm({
+         titulo: "Aprovação em Lote",
+         mensagem: `Deseja aprovar e confirmar <strong>${checked.length} agendamento(s)</strong>?<br><span class="text-[10px] text-slate-400">A data da solicitação será mantida como oficial.</span>`,
+         textoConfirmar: "Sim, Aprovar",
+         tipo: "warning",
+         icone: "done_all"
+       });
+       if (!ok) return;
        
        mostrarLoading("Aprovando Lote...", `Confirmando ${checked.length} agendamento(s)...`, "done_all");
        try {
@@ -1769,7 +1918,15 @@
        const duplicates = nfListManual.filter(nf => existingNFs.includes(nf));
        
        if(duplicates.length > 0) {
-          if(!confirm(`⚠️ ATENÇÃO: As notas [${duplicates.join(', ')}] já estão registradas em outro agendamento. Deseja prosseguir mesmo assim?`)) return;
+          const ok = await customConfirm({
+            titulo: "Notas Fiscais Duplicadas",
+            mensagem: `⚠️ <strong>ATENÇÃO:</strong> As notas <strong>[${duplicates.join(', ')}]</strong> já foram registradas anteriormente em outro agendamento.<br><br>Deseja prosseguir mesmo assim?`,
+            textoConfirmar: "Prosseguir",
+            textoCancelar: "Revisar NFs",
+            tipo: "danger",
+            icone: "warning"
+          });
+          if (!ok) return;
        }
 
        const payload = {
@@ -1985,6 +2142,15 @@
     }
 
     async function excluir(id) { 
+        const ok = await customConfirm({
+          titulo: "Excluir Registro",
+          mensagem: "Tem certeza que deseja remover este alerta/agendamento?",
+          textoConfirmar: "Sim, Excluir",
+          tipo: "danger",
+          icone: "delete"
+        });
+        if (!ok) return;
+
         mostrarLoading("Excluindo...", "Removendo registro do banco de dados...", "delete");
         try {
           await gas('excluirAlertaFlow', id); 
@@ -1997,30 +2163,44 @@
     }
     
     async function excluirTabela(id) { 
-        if(confirm('Tem certeza que deseja excluir permanentemente este registro?')) { 
-            mostrarLoading("Excluindo...", "Removendo agendamento do banco de dados...", "delete");
-            try {
-              await gas('excluirAlertaFlow', id); 
-              await carregarDados(false, false);
-            } catch(e) {
-              notify('Erro', 'Falha ao excluir.', 'error');
-            } finally {
-              ocultarLoading();
-            }
-        } 
+        const ok = await customConfirm({
+          titulo: "Excluir Agendamento",
+          mensagem: "Tem certeza que deseja excluir permanentemente este registro de agendamento?",
+          textoConfirmar: "Sim, Excluir",
+          tipo: "danger",
+          icone: "delete"
+        });
+        if (!ok) return;
+
+        mostrarLoading("Excluindo...", "Removendo agendamento do banco de dados...", "delete");
+        try {
+          await gas('excluirAlertaFlow', id); 
+          await carregarDados(false, false);
+        } catch(e) {
+          notify('Erro', 'Falha ao excluir.', 'error');
+        } finally {
+          ocultarLoading();
+        }
     }
 
     async function excluirDivergenciaMenu(index) {
-        if(confirm('⚠️ AVISO DE CONSEQUÊNCIAS:\nAo excluir este registro de divergência, você removerá permanentemente a evidência de conferência de faltas deste fornecedor. Esta ação não pode ser desfeita e afetará o histórico de auditoria e prestação de contas. Deseja prosseguir?')) {
-           mostrarLoading("Excluindo Divergência...", "Removendo registro do banco de dados...", "delete");
-           try {
-             await gas('excluirDivergencia', index);
-             await carregarDados(false, false);
-           } catch(e) {
-             notify('Erro', 'Falha ao excluir divergência.', 'error');
-           } finally {
-             ocultarLoading();
-           }
+        const ok = await customConfirm({
+          titulo: "Excluir Registro de Divergência",
+          mensagem: "⚠️ <strong>AVISO DE AUDITORIA:</strong><br>Ao excluir esta divergência, você removerá permanentemente a evidência de conferência de faltas deste fornecedor.<br><br>Esta ação não pode ser desfeita. Deseja prosseguir?",
+          textoConfirmar: "Confirmar Exclusão",
+          tipo: "danger",
+          icone: "report_problem"
+        });
+        if (!ok) return;
+
+        mostrarLoading("Excluindo Divergência...", "Removendo registro do banco de dados...", "delete");
+        try {
+          await gas('excluirDivergencia', index);
+          await carregarDados(false, false);
+        } catch(e) {
+          notify('Erro', 'Falha ao excluir divergência.', 'error');
+        } finally {
+          ocultarLoading();
         }
     }
 
