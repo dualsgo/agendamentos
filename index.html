@@ -57,6 +57,12 @@
       100% { border-color: #dc2626; opacity: 1; }
     }
 
+    @keyframes loadingBar {
+      0% { left: -50%; width: 30%; }
+      50% { left: 35%; width: 60%; }
+      100% { left: 100%; width: 30%; }
+    }
+
     /* SIDEBAR COLLAPSE LOGIC */
     .sidebar-transition { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .sidebar-expanded { width: 420px !important; }
@@ -153,6 +159,36 @@
 <body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden selection:bg-primary-fixed selection:text-primary">
 
   <div id="notif-container" class="notif-container"></div>
+
+  <!-- OVERLAY DE CARREGAMENTO / ATUALIZAÇÃO (BLUR & ANIMAÇÃO) -->
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[99999] flex flex-col items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none select-none">
+    <div class="bg-white/95 border border-white/40 shadow-2xl rounded-3xl p-8 max-w-xs w-full flex flex-col items-center text-center modal-enter relative overflow-hidden">
+      <!-- Glow decorativo de fundo -->
+      <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Spinner Animação Multicamadas -->
+      <div class="relative w-20 h-20 mb-5 flex items-center justify-center shrink-0">
+        <!-- Anel externo giratório em vermelho Ri Happy -->
+        <div class="absolute inset-0 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <!-- Anel interno giratório invertido em dourado -->
+        <div class="absolute inset-2 border-4 border-amber-500/20 border-b-amber-500 rounded-full animate-[spin_1.5s_linear_infinite_reverse]"></div>
+        <!-- Ícone central pulsante -->
+        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center animate-pulse">
+          <span id="loading-icon" class="material-symbols-outlined text-primary text-2xl animate-bounce">sync</span>
+        </div>
+      </div>
+
+      <!-- Textos do Indicador -->
+      <h3 id="loading-title" class="text-base font-black text-slate-800 tracking-tight leading-snug">Processando...</h3>
+      <p id="loading-message" class="text-xs text-slate-500 font-medium mt-1.5 leading-relaxed">Comunicando com o banco de dados</p>
+
+      <!-- Barra de progresso indeterminada -->
+      <div class="w-full bg-slate-100 h-1.5 rounded-full mt-5 overflow-hidden relative">
+        <div class="bg-gradient-to-r from-primary via-amber-500 to-primary h-full w-1/2 rounded-full absolute animate-[loadingBar_1.5s_ease-in-out_infinite]"></div>
+      </div>
+      <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mt-3">Por favor, aguarde</p>
+    </div>
+  </div>
 
   <!-- MODAIS EXISTENTES (mantidos) -->
   <div id="modal-atraso" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
@@ -702,6 +738,30 @@
       setTimeout(() => el.remove(), 4000);
     };
 
+    function mostrarLoading(titulo = "Carregando...", mensagem = "Comunicando com o banco de dados", icone = "sync") {
+      const overlay = document.getElementById('loading-overlay');
+      const titleEl = document.getElementById('loading-title');
+      const msgEl = document.getElementById('loading-message');
+      const iconEl = document.getElementById('loading-icon');
+      
+      if (titleEl) titleEl.innerText = titulo;
+      if (msgEl) msgEl.innerText = mensagem;
+      if (iconEl) iconEl.innerText = icone;
+      
+      if (overlay) {
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+        overlay.classList.add('opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    function ocultarLoading() {
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) {
+        overlay.classList.remove('opacity-100', 'pointer-events-auto');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
     function abrirModalGenerico(id) { 
         const el = document.getElementById(id);
         if(el) el.classList.remove('hidden'); 
@@ -873,7 +933,10 @@
     // ============================================================
     // CARREGAMENTO DE DADOS
     // ============================================================
-    async function carregarDados(forcarAtraso = false) {
+    async function carregarDados(forcarAtraso = false, mostrarOverlay = true) {
+      if (mostrarOverlay) {
+        mostrarLoading("Sincronizando...", "Buscando dados no banco de dados...", "cloud_sync");
+      }
       const syncIcons = document.querySelectorAll('.sync-icon');
       syncIcons.forEach(icon => icon.classList.add('animate-spin'));
       const flowDesk = document.getElementById('flow-list-desk');
@@ -930,6 +993,7 @@
       } catch (e) { notify('Erro', 'Sincronização falhou.', 'error'); }
       finally {
         syncIcons.forEach(icon => icon.classList.remove('animate-spin'));
+        if (mostrarOverlay) ocultarLoading();
       }
     }
 
@@ -1407,17 +1471,19 @@
       
       if (!confirm(`Deseja alterar o status para "${novoStatus}"?`)) return;
       
+      mostrarLoading("Atualizando Status...", `Alterando status para "${novoStatus}"...`, "edit");
       try {
-        notify('Atualizando...', 'Aguarde', 'info');
         const result = await gas('atualizarStatus', rowIndex, novoStatus);
         if (result === 'OK') {
           notify('Sucesso', `Status alterado para ${novoStatus}`, 'info');
-          carregarDados();
+          await carregarDados(false, false);
         } else {
           notify('Erro', result, 'error');
         }
       } catch (e) {
         notify('Erro', 'Falha ao atualizar status', 'error');
+      } finally {
+        ocultarLoading();
       }
     }
 
@@ -1435,17 +1501,19 @@
         return;
       }
       
+      mostrarLoading("Atualizando Data...", `Alterando data para ${novaData}...`, "calendar_month");
       try {
-        notify('Atualizando...', 'Aguarde', 'info');
         const result = await gas('atualizarDataSugerida', rowIndex, novaData);
         if (result === 'OK') {
           notify('Sucesso', `Data alterada para ${novaData}`, 'info');
-          carregarDados();
+          await carregarDados(false, false);
         } else {
           notify('Erro', result, 'error');
         }
       } catch (e) {
         notify('Erro', 'Falha ao atualizar data', 'error');
+      } finally {
+        ocultarLoading();
       }
     }
 
@@ -1576,7 +1644,7 @@
           return;
        }
        
-       notify('Enviando...', 'Aguarde', 'info');
+       mostrarLoading("Enviando Resposta...", "Disparando e-mail para o fornecedor...", "send");
        try {
           const res = await gas('responderEmail', id, msg);
           if (res === 'OK') {
@@ -1587,6 +1655,8 @@
           }
        } catch (e) {
           notify('Erro', 'Falha ao enviar resposta.', 'error');
+       } finally {
+          ocultarLoading();
        }
     }
 
@@ -1662,7 +1732,7 @@
        if(checked.length === 0) return;
        if(!confirm(`Deseja aprovar e confirmar ${checked.length} agendamento(s)?\nA data atual da solicitação será utilizada.`)) return;
        
-       notify('Aprovando...', 'Aguarde', 'info');
+       mostrarLoading("Aprovando Lote...", `Confirmando ${checked.length} agendamento(s)...`, "done_all");
        try {
          const idsStr = checked.join(',');
          const result = await gas('aprovarLote', idsStr);
@@ -1672,10 +1742,12 @@
             notify('Sucesso', 'Lote aprovado com sucesso!', 'success');
             document.querySelectorAll('.chk-alerta:checked').forEach(cb => cb.checked = false);
             atualizarBotaoAprovarLote();
-            carregarDados();
+            await carregarDados(false, false);
          }
        } catch(e) {
          notify('Erro', 'Falha ao aprovar lote', 'error');
+       } finally {
+         ocultarLoading();
        }
     }
 
@@ -1713,7 +1785,7 @@
           resumo_direto: document.getElementById('f-resumo-direto').value
        };
        
-       notify('Aguarde', 'Gravando agendamento...', 'info');
+       mostrarLoading("Salvando Agendamento...", "Gravando dados no banco de dados...", "save");
        fecharModal('modal-agendamento');
        
        try {
@@ -1722,9 +1794,13 @@
              notify('Erro', res, 'error');
          } else {
              notify('Sucesso', 'Salvo com sucesso!', 'info');
+             await carregarDados(false, false);
          }
-         setTimeout(() => carregarDados(), 1000);
-       } catch(e) { notify('Erro', 'Falha ao salvar. Tente novamente.', 'error'); }
+       } catch(e) { 
+         notify('Erro', 'Falha ao salvar. Tente novamente.', 'error'); 
+       } finally {
+         ocultarLoading();
+       }
     });
 
     function abrirSettings() {
@@ -1739,11 +1815,17 @@
           limite_vols: document.getElementById('s-limite').value,
           data_inventario: document.getElementById('s-inventario').value
        };
-       notify('Salvando', 'Atualizando configurações...', 'info');
+       mostrarLoading("Salvando Configurações...", "Atualizando preferências no banco de dados...", "settings");
        fecharModal('modal-settings');
-       await gas('salvarSettings', newS);
-       carregarDados();
-       notify('Sucesso', 'Configurações aplicadas!', 'info');
+       try {
+         await gas('salvarSettings', newS);
+         await carregarDados(false, false);
+         notify('Sucesso', 'Configurações aplicadas!', 'info');
+       } catch(e) {
+         notify('Erro', 'Falha ao salvar configurações.', 'error');
+       } finally {
+         ocultarLoading();
+       }
     });
 
     function toggleTodosCheckboxes(s) { 
@@ -1818,7 +1900,7 @@
        const ids = document.getElementById('c-ids').value;
        const type = document.getElementById('c-type').value;
        
-       notify('Registrando...', 'Aguarde', 'info');
+       mostrarLoading("Registrando Recebimento...", "Salvando conferência física no banco de dados...", "task_alt");
        
        try {
          if (type === 'DIFF') {
@@ -1848,10 +1930,12 @@
          }
          
          fecharModal('modal-checkin');
-         carregarDados();
+         await carregarDados(false, false);
          notify('Sucesso', 'Recebimento registrado', 'success');
        } catch (e) {
          notify('Erro', 'Falha ao registrar: ' + e.message, 'error');
+       } finally {
+         ocultarLoading();
        }
     }
 
@@ -1901,24 +1985,42 @@
     }
 
     async function excluir(id) { 
-        notify('Limpando...', 'Aguarde um momento', 'info'); 
-        await gas('excluirAlertaFlow', id); 
-        carregarDados(); 
+        mostrarLoading("Excluindo...", "Removendo registro do banco de dados...", "delete");
+        try {
+          await gas('excluirAlertaFlow', id); 
+          await carregarDados(false, false);
+        } catch(e) {
+          notify('Erro', 'Falha ao excluir.', 'error');
+        } finally {
+          ocultarLoading();
+        }
     }
     
     async function excluirTabela(id) { 
         if(confirm('Tem certeza que deseja excluir permanentemente este registro?')) { 
-            notify('Excluindo...', 'Aguarde', 'warning'); 
-            await gas('excluirAlertaFlow', id); 
-            carregarDados(); 
+            mostrarLoading("Excluindo...", "Removendo agendamento do banco de dados...", "delete");
+            try {
+              await gas('excluirAlertaFlow', id); 
+              await carregarDados(false, false);
+            } catch(e) {
+              notify('Erro', 'Falha ao excluir.', 'error');
+            } finally {
+              ocultarLoading();
+            }
         } 
     }
 
     async function excluirDivergenciaMenu(index) {
         if(confirm('⚠️ AVISO DE CONSEQUÊNCIAS:\nAo excluir este registro de divergência, você removerá permanentemente a evidência de conferência de faltas deste fornecedor. Esta ação não pode ser desfeita e afetará o histórico de auditoria e prestação de contas. Deseja prosseguir?')) {
-           notify('Excluindo...', 'Limpando registro', 'warning');
-           await gas('excluirDivergencia', index);
-           carregarDados();
+           mostrarLoading("Excluindo Divergência...", "Removendo registro do banco de dados...", "delete");
+           try {
+             await gas('excluirDivergencia', index);
+             await carregarDados(false, false);
+           } catch(e) {
+             notify('Erro', 'Falha ao excluir divergência.', 'error');
+           } finally {
+             ocultarLoading();
+           }
         }
     }
 
@@ -1966,11 +2068,11 @@
       // No celular, abre diretamente na visão de Calendário por padrão
       const initialTab = (window.innerWidth < 768) ? 'calendario' : 'pendentes';
       mudarAba(initialTab);
-      carregarDados(true);
+      carregarDados(true, true);
 
-      // Sincronização automática em segundo plano a cada 60 segundos (1 minuto)
+      // Sincronização automática em segundo plano a cada 60 segundos (sem overlay)
       setInterval(() => {
-        carregarDados(false);
+        carregarDados(false, false);
       }, 60000);
     };
   </script>
