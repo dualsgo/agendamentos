@@ -428,6 +428,7 @@
                       <option value="PENDENTE">Pendente</option>
                       <option value="CONFIRMADO">Confirmado</option>
                       <option value="EM TRATATIVA">Em Tratativa</option>
+                      <option value="AGUARDANDO LIBERAÇÃO">Aguardando Liberação da Nota</option>
                       <option value="CANCELADO">Cancelado</option>
                       <option value="CONCLUÍDO">Concluído</option>
                    </select>
@@ -440,14 +441,17 @@
                 
                 <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-2">
                    <button type="submit" id="btn-confirmar-modal" class="w-full py-4 rounded-2xl bg-green-600 font-black text-white shadow-xl shadow-green-600/30 active:scale-95 transition-all text-sm uppercase tracking-wider mb-2">Confirmar Informações</button>
-                   <div class="flex w-full gap-2">
-                      <button type="button" onclick="abrirRespostaRapida()" class="flex-1 py-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 font-black text-[10px] flex items-center justify-center gap-1.5 hover:bg-blue-100 active:scale-95 transition-all uppercase">
+                   <div class="grid grid-cols-2 md:grid-cols-4 w-full gap-2">
+                      <button type="button" onclick="marcarAguardandoLiberacao(document.getElementById('f-id').value, document.getElementById('f-row-index').value); fecharModal('modal-agendamento')" class="py-3 rounded-2xl bg-purple-50 border border-purple-200 text-purple-700 font-black text-[10px] flex items-center justify-center gap-1 hover:bg-purple-100 active:scale-95 transition-all uppercase">
+                         <span class="material-symbols-outlined text-[16px]">hourglass_top</span> Aguardar Nota
+                      </button>
+                      <button type="button" onclick="abrirRespostaRapida()" class="py-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 font-black text-[10px] flex items-center justify-center gap-1 hover:bg-blue-100 active:scale-95 transition-all uppercase">
                          <span class="material-symbols-outlined text-[16px]">reply</span> Responder
                       </button>
-                      <button type="button" onclick="abrirGmail()" class="flex-1 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 font-black text-[10px] flex items-center justify-center gap-1.5 hover:bg-slate-200 active:scale-95 transition-all uppercase">
+                      <button type="button" onclick="abrirGmail()" class="py-3 rounded-2xl bg-slate-100 border border-slate-200 text-slate-600 font-black text-[10px] flex items-center justify-center gap-1 hover:bg-slate-200 active:scale-95 transition-all uppercase">
                          <span class="material-symbols-outlined text-[16px] text-primary">mail</span> Gmail
                       </button>
-                      <button type="button" id="btn-visto-modal" onclick="excluir(document.getElementById('f-id').value); fecharModal('modal-agendamento')" class="flex-1 py-3 rounded-2xl bg-white border border-slate-200 text-slate-400 font-black text-[10px] active:scale-95 transition-all uppercase hover:bg-slate-50">Visto</button>
+                      <button type="button" id="btn-visto-modal" onclick="excluir(document.getElementById('f-id').value); fecharModal('modal-agendamento')" class="py-3 rounded-2xl bg-white border border-slate-200 text-slate-400 font-black text-[10px] active:scale-95 transition-all uppercase hover:bg-slate-50">Visto</button>
                    </div>
                 </div>
              </div>
@@ -520,9 +524,27 @@
           </div>
        </div>
        
-       <div class="flex flex-col gap-2 text-[10px] font-bold text-outline uppercase tracking-wide mb-6 px-2 expanded-only shrink-0">
-         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Nova Solicitação</span>
-         <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Reagendamento / Alteração</span>
+       <!-- BOTÕES DE FILTRO DA CAIXA DE ENTRADA (DESKTOP) -->
+       <div class="flex flex-col gap-1.5 mb-6 px-2 expanded-only shrink-0">
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Filtrar Caixa:</span>
+          <div class="grid grid-cols-2 gap-1.5">
+             <button type="button" id="btn-flow-filter-todas" onclick="setFlowFilter('todas')" class="flow-filter-btn py-2 px-2.5 bg-slate-800 text-white rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all shadow-sm border border-slate-800">
+                <span>Todas</span>
+                <span id="count-filter-todas" class="bg-white/20 text-white px-1.5 py-0.5 rounded-md text-[8px]">0</span>
+             </button>
+             <button type="button" id="btn-flow-filter-novas" onclick="setFlowFilter('novas')" class="flow-filter-btn py-2 px-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-700 rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-600"></span> Novas</span>
+                <span id="count-filter-novas" class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-md text-[8px]">0</span>
+             </button>
+             <button type="button" id="btn-flow-filter-reagendamentos" onclick="setFlowFilter('reagendamentos')" class="flow-filter-btn py-2 px-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700 rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Alterações</span>
+                <span id="count-filter-reagendamentos" class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-md text-[8px]">0</span>
+             </button>
+             <button type="button" id="btn-flow-filter-aguardando" onclick="setFlowFilter('aguardando')" class="flow-filter-btn py-2 px-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-600"></span> Aguardando</span>
+                <span id="count-filter-aguardando" class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-md text-[8px]">0</span>
+             </button>
+          </div>
        </div>
        
        <div id="flow-list-desk" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar px-2"></div>
@@ -537,7 +559,7 @@
       </div>
 
       <div id="flow-container-mob" class="md:hidden shrink-0 w-full pt-2 mb-4">
-        <div class="mb-3 flex items-center justify-between">
+        <div class="mb-2 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <h2 class="text-sm font-black text-slate-800 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">mail</span> Caixa de Entrada</h2>
             <span id="flow-count-mob" class="bg-error text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm">0</span>
@@ -551,6 +573,15 @@
             </button>
           </div>
         </div>
+
+        <!-- FILTROS MOBILE EM BARRA HORIZONTAL DE ROLAGEM -->
+        <div class="flex overflow-x-auto hide-scrollbar gap-1.5 mb-3 py-1">
+          <button type="button" id="btn-mob-flow-filter-todas" onclick="setFlowFilter('todas')" class="py-1 px-3 bg-slate-800 text-white rounded-full font-black text-[9px] uppercase tracking-wider whitespace-nowrap shadow-sm">Todas (<span id="mob-count-filter-todas">0</span>)</button>
+          <button type="button" id="btn-mob-flow-filter-novas" onclick="setFlowFilter('novas')" class="py-1 px-3 bg-white border border-slate-200 text-slate-600 rounded-full font-bold text-[9px] uppercase tracking-wider whitespace-nowrap">Novas (<span id="mob-count-filter-novas">0</span>)</button>
+          <button type="button" id="btn-mob-flow-filter-reagendamentos" onclick="setFlowFilter('reagendamentos')" class="py-1 px-3 bg-white border border-slate-200 text-slate-600 rounded-full font-bold text-[9px] uppercase tracking-wider whitespace-nowrap">Alterações (<span id="mob-count-filter-reagendamentos">0</span>)</button>
+          <button type="button" id="btn-mob-flow-filter-aguardando" onclick="setFlowFilter('aguardando')" class="py-1 px-3 bg-white border border-slate-200 text-slate-600 rounded-full font-bold text-[9px] uppercase tracking-wider whitespace-nowrap">Aguardando (<span id="mob-count-filter-aguardando">0</span>)</button>
+        </div>
+
         <div id="flow-list-mob" class="flex overflow-x-auto hide-scrollbar gap-4 pb-4 snap-x w-full"></div>
       </div>
 
@@ -1167,23 +1198,102 @@
     // ============================================================
     // RENDERIZAÇÃO
     // ============================================================
+    let currentFlowFilter = 'todas';
+    let minimizedAlertCards = {};
+
+    function toggleMinimizarCard(uniqueId) {
+      minimizedAlertCards[uniqueId] = !minimizedAlertCards[uniqueId];
+      renderizarFlow();
+    }
+
+    async function marcarAguardandoLiberacao(id, rowIndex) {
+       const target = rowIndex || id;
+       if (!target) return;
+
+       const ok = await customConfirm({
+         titulo: "Aguardando Liberação da Nota",
+         mensagem: "Deseja marcar este agendamento como <strong>'Aguardando Liberação da Nota'</strong>?<br><span class='text-[10px] text-slate-400'>O card será minimizado e sinalizado na caixa de entrada sem poluir a visão de novas solicitações.</span>",
+         textoConfirmar: "Sim, Marcar",
+         tipo: "warning",
+         icone: "hourglass_top"
+       });
+       if (!ok) return;
+
+       mostrarLoading("Atualizando...", "Marcando como aguardando liberação da nota...", "hourglass_top");
+       try {
+         const res = await gas('atualizarStatus', target, 'AGUARDANDO LIBERAÇÃO');
+         if (res === 'OK') {
+           notify('Atualizado', 'Marcado como Aguardando Liberação da Nota', 'info');
+           await carregarDados(false, false);
+         } else {
+           notify('Erro', res, 'error');
+         }
+       } catch(e) {
+         notify('Erro', 'Falha ao atualizar status', 'error');
+       } finally {
+         ocultarLoading();
+       }
+    }
+
+    function setFlowFilter(filter) {
+      currentFlowFilter = filter;
+      const filters = ['todas', 'novas', 'reagendamentos', 'aguardando'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`btn-flow-filter-${f}`);
+        const btnMob = document.getElementById(`btn-mob-flow-filter-${f}`);
+        const isSelected = (f === filter);
+        
+        const activeDeskClasses = {
+          'todas': 'bg-slate-800 text-white shadow-sm border-slate-800',
+          'novas': 'bg-red-600 text-white shadow-sm border-red-600',
+          'reagendamentos': 'bg-amber-500 text-white shadow-sm border-amber-500',
+          'aguardando': 'bg-purple-600 text-white shadow-sm border-purple-600'
+        };
+
+        if (btn) {
+          if (isSelected) {
+            btn.className = `flow-filter-btn py-2 px-2.5 ${activeDeskClasses[f]} border rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all`;
+          } else {
+            btn.className = `flow-filter-btn py-2 px-2.5 bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl font-black text-[9px] uppercase tracking-wider flex items-center justify-between transition-all`;
+          }
+        }
+
+        if (btnMob) {
+          if (isSelected) {
+            btnMob.className = `py-1 px-3 ${activeDeskClasses[f]} rounded-full font-black text-[9px] uppercase tracking-wider whitespace-nowrap shadow-sm`;
+          } else {
+            btnMob.className = `py-1 px-3 bg-white border border-slate-200 text-slate-600 rounded-full font-bold text-[9px] uppercase tracking-wider whitespace-nowrap`;
+          }
+        }
+      });
+
+      renderizarFlow();
+    }
+
     function processarObservacao(item) {
        if (typeof item === 'string') {
           item = { observacoes: item };
        }
        const obs = item.observacoes || '';
        const resumo = item.resumo_direto || '';
-       const st = (item.status || 'PENDENTE').toUpperCase();
+       const st = (item.status || 'PENDENTE').toUpperCase().trim();
        const comboText = (resumo + ' ' + obs).toLowerCase();
 
        let b = 'Nova Solicitação';
        let badgeClass = 'bg-red-100 text-red-700 border border-red-300';
        let borderColor = '#dc2626';
+       let cat = 'novas';
 
-       if (st === 'ALTERACAO_SOLICITADA' || st === 'EM TRATATIVA' || comboText.includes('reagendamento') || comboText.includes('sugere nova data') || comboText.includes('alteração') || comboText.includes('tratativa')) {
+       if (st === 'AGUARDANDO LIBERAÇÃO' || st === 'AGUARDANDO LIBERACAO' || st === 'AGUARDANDO NOTA' || comboText.includes('aguardando liberação') || comboText.includes('aguardando nota') || comboText.includes('liberação da nota')) {
+          b = 'Aguardando Liberação';
+          badgeClass = 'bg-purple-100 text-purple-800 border border-purple-300';
+          borderColor = '#9333ea';
+          cat = 'aguardando';
+       } else if (st === 'ALTERACAO_SOLICITADA' || st === 'EM TRATATIVA' || comboText.includes('reagendamento') || comboText.includes('sugere nova data') || comboText.includes('alteração') || comboText.includes('tratativa')) {
           b = 'Reagendamento';
           badgeClass = 'bg-amber-100 text-amber-800 border border-amber-300';
           borderColor = '#d97706';
+          cat = 'reagendamentos';
        }
 
        const textoExibicao = resumo || obs || 'Sem resumo disponível.';
@@ -1192,6 +1302,7 @@
           badge: b, 
           badgeClass: badgeClass, 
           borderColor: borderColor, 
+          categoria: cat,
           textFormatted: textoExibicao.replace(/\[(.*?)\]/g, '<strong>[$1]</strong>'), 
           textRaw: textoExibicao 
        };
@@ -1209,6 +1320,23 @@
       const wrapperMob = document.getElementById('flow-container-mob');
       const mobBadge = document.getElementById('nav-badge-mob');
 
+      // Atualizar contagens dos botões de filtro
+      const countTodas = stateAlertas.length;
+      const countNovas = stateAlertas.filter(i => processarObservacao(i).categoria === 'novas').length;
+      const countReagendamentos = stateAlertas.filter(i => processarObservacao(i).categoria === 'reagendamentos').length;
+      const countAguardando = stateAlertas.filter(i => processarObservacao(i).categoria === 'aguardando').length;
+
+      const setElText = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+      setElText('count-filter-todas', countTodas);
+      setElText('count-filter-novas', countNovas);
+      setElText('count-filter-reagendamentos', countReagendamentos);
+      setElText('count-filter-aguardando', countAguardando);
+
+      setElText('mob-count-filter-todas', countTodas);
+      setElText('mob-count-filter-novas', countNovas);
+      setElText('mob-count-filter-reagendamentos', countReagendamentos);
+      setElText('mob-count-filter-aguardando', countAguardando);
+
       if (mobBadge) {
         if (stateAlertas.length > 0) {
            mobBadge.innerText = stateAlertas.length > 99 ? '99+' : stateAlertas.length;
@@ -1218,61 +1346,125 @@
         }
       }
 
-      if(document.getElementById('flow-count-desk')) document.getElementById('flow-count-desk').innerText = stateAlertas.length;
-      if(document.getElementById('flow-count-col')) document.getElementById('flow-count-col').innerText = stateAlertas.length;
-      if(document.getElementById('flow-count-mob')) document.getElementById('flow-count-mob').innerText = stateAlertas.length;
+      setElText('flow-count-desk', stateAlertas.length);
+      setElText('flow-count-col', stateAlertas.length);
+      setElText('flow-count-mob', stateAlertas.length);
+
       if (stateAlertas.length === 0) {
         if(wrapperMob) wrapperMob.classList.add('hidden');
         if(containerDesk) containerDesk.innerHTML = `<div class="expanded-only text-center py-10 text-slate-400 text-sm font-bold">Tudo limpo por aqui. ✨</div><div class="collapsed-only flex justify-center mt-4"><span class="material-symbols-outlined text-slate-300">done_all</span></div>`;
         return;
       }
       if(wrapperMob) wrapperMob.classList.remove('hidden');
+
+      // Filtrar alertas conforme filtro selecionado
+      const alertasExibicao = stateAlertas.filter(item => {
+        const info = processarObservacao(item);
+        if (currentFlowFilter === 'todas') return true;
+        return info.categoria === currentFlowFilter;
+      });
+
+      if (alertasExibicao.length === 0) {
+        const emptyMsg = `<div class="w-full text-center py-8 text-slate-400 text-xs font-bold bg-white rounded-2xl border border-slate-200">Nenhum item nesta categoria.</div>`;
+        if (containerDesk) containerDesk.innerHTML = `<div class="expanded-only w-full">${emptyMsg}</div>`;
+        if (containerMob) containerMob.innerHTML = emptyMsg;
+        return;
+      }
+
       let htmlExpanded = '', htmlCollapsed = '', htmlMob = '';
-      stateAlertas.forEach((item, index) => {
+      alertasExibicao.forEach((item, index) => {
         const info = processarObservacao(item);
         const uniqueId = item.id || `card-${index}`;
+        const realIndexState = stateAlertas.findIndex(x => x.id === item.id);
         const urgencia = calcularTempoEurgencia(item.data_real); 
         const dtStr = formatarDataHumanizada(item.data_sugerida);
         const avatar = getAvatarStyle(item.fornecedor);
-        const cardBody = (isMobView) => `
-          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="${uniqueId}" onchange="atualizarBotaoAprovarLote()" class="chk-alerta w-4 h-4 rounded text-green-600 border-slate-300">
-              <span class="${urgencia.badgeClass} px-2.5 py-1 rounded-md text-[9px] uppercase tracking-wider flex items-center gap-1">
-                 <span class="material-symbols-outlined text-[13px]">${urgencia.icon}</span> ${urgencia.text}
-              </span>
-            </div>
-            <span class="${info.badgeClass} px-2 py-1 rounded-md text-[8px] font-extrabold uppercase tracking-wider">${info.badge}</span>
-          </div>
 
-          <div class="flex justify-between items-start mb-1 gap-2">
-            <h3 class="font-extrabold text-on-surface text-sm truncate">${item.fornecedor || 'Desconhecido'}</h3>
-            <span class="text-[9px] font-extrabold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded-md shrink-0">Data: ${dtStr}</span>
-          </div>
+        // Minimiza se categoria é 'aguardando' (a não ser que desmarcado pelo usuário) OU se minimizado manualmente
+        const isMinimizado = (minimizedAlertCards[uniqueId] === true) || (info.categoria === 'aguardando' && minimizedAlertCards[uniqueId] !== false);
 
-          <p class="text-[11px] text-outline font-mono mb-3">NF: ${item.notas_fiscais || 'N/A'} • Vol: ${item.volumes || 'N/I'}</p>
+        if (isMinimizado) {
+           // CARD MINIMIZADO (COMPACTO E SEM POLUIR VISUALMENTE)
+           const cardBodyMinimized = `
+             <div class="flex items-center justify-between gap-2 p-3 bg-purple-50/70 hover:bg-purple-50 rounded-2xl border border-purple-200 transition-all shadow-sm">
+                <div class="flex items-center gap-2.5 overflow-hidden flex-1">
+                   <input type="checkbox" value="${uniqueId}" onchange="atualizarBotaoAprovarLote()" class="chk-alerta w-4 h-4 rounded text-green-600 border-slate-300 shrink-0">
+                   <div class="w-7 h-7 rounded-full bg-purple-200 text-purple-800 flex items-center justify-center font-bold text-[10px] shrink-0">${avatar.initial}</div>
+                   <div class="overflow-hidden flex-1">
+                      <div class="flex items-center gap-1.5">
+                         <h4 class="font-extrabold text-slate-800 text-xs truncate">${item.fornecedor || 'Desconhecido'}</h4>
+                         <span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-purple-200 text-purple-900 shrink-0">Aguardando Nota</span>
+                      </div>
+                      <p class="text-[9px] text-slate-500 font-mono truncate">NF: ${item.notas_fiscais || 'N/A'} • Vol: ${item.volumes || 'N/I'} • Data: ${dtStr}</p>
+                   </div>
+                </div>
 
-          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 flex-1">
-            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Resumo Direto:</p>
-            <div id="obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}" class="text-[11px] text-slate-700 leading-relaxed line-clamp-2 font-medium">${info.textFormatted}</div>
-            <button type="button" onclick="toggleHist('obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}', this)" class="text-[9px] font-extrabold text-primary mt-1 flex items-center">Ler mais</button>
-          </div>
-
-          <div class="flex flex-col gap-2 mt-auto">
-             <button type="button" onclick="abrirModal(stateAlertas[${index}], true)" class="w-full py-2.5 rounded-xl bg-primary text-white text-[10px] font-extrabold active:scale-95 transition-transform shadow-md shadow-primary/20">VISUALIZAR RESUMO</button>
-             <div class="flex gap-2">
-                <button type="button" onclick="window.open('https://mail.google.com/mail/u/0/#all/' + '${item.id}', '_blank')" class="flex-1 py-2.5 rounded-xl bg-white border border-slate-200 text-primary text-[10px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 flex items-center justify-center gap-1 whitespace-nowrap"><span class="material-symbols-outlined text-[14px]">mail</span> VISUALIZAR NO GMAIL</button>
-                <button type="button" onclick="excluir('${item.id}')" class="flex-0 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-outline text-[10px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 uppercase">VISTO</button>
+                <div class="flex items-center gap-1 shrink-0">
+                   <button type="button" onclick="abrirModal(stateAlertas[${realIndexState >= 0 ? realIndexState : index}], true)" title="Agendar Entrega" class="p-1.5 bg-primary text-white rounded-lg active:scale-95 transition-transform flex items-center justify-center">
+                      <span class="material-symbols-outlined text-[14px]">edit_calendar</span>
+                   </button>
+                   <button type="button" onclick="toggleMinimizarCard('${uniqueId}')" title="Expandir Card" class="p-1.5 bg-white border border-purple-200 text-purple-700 rounded-lg hover:bg-purple-100 active:scale-95 transition-transform flex items-center justify-center">
+                      <span class="material-symbols-outlined text-[14px]">unfold_more</span>
+                   </button>
+                   <button type="button" onclick="excluir('${item.id}')" title="Marcar como Visto" class="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-red-600 rounded-lg active:scale-95 transition-transform flex items-center justify-center">
+                      <span class="material-symbols-outlined text-[14px]">close</span>
+                   </button>
+                </div>
              </div>
-          </div>
-        `;
-        htmlMob += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 w-[85vw] shrink-0 snap-center flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(true)}</div>`;
-        htmlExpanded += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(false)}</div>`;
-        let collapseColor = info.borderColor === '#dc2626' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'; 
+           `;
+           htmlMob += `<div class="w-[85vw] shrink-0 snap-center flex flex-col">${cardBodyMinimized}</div>`;
+           htmlExpanded += `<div class="w-full">${cardBodyMinimized}</div>`;
+        } else {
+           // CARD EXPANDIDO (DETALHADO)
+           const cardBody = (isMobView) => `
+             <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+               <div class="flex items-center gap-2">
+                 <input type="checkbox" value="${uniqueId}" onchange="atualizarBotaoAprovarLote()" class="chk-alerta w-4 h-4 rounded text-green-600 border-slate-300">
+                 <span class="${urgencia.badgeClass} px-2.5 py-1 rounded-md text-[9px] uppercase tracking-wider flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">${urgencia.icon}</span> ${urgencia.text}
+                 </span>
+               </div>
+               <div class="flex items-center gap-1.5">
+                 <span class="${info.badgeClass} px-2 py-1 rounded-md text-[8px] font-extrabold uppercase tracking-wider">${info.badge}</span>
+                 <button type="button" onclick="toggleMinimizarCard('${uniqueId}')" title="Minimizar Card" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg"><span class="material-symbols-outlined text-[16px]">unfold_less</span></button>
+               </div>
+             </div>
+
+             <div class="flex justify-between items-start mb-1 gap-2">
+               <h3 class="font-extrabold text-on-surface text-sm truncate">${item.fornecedor || 'Desconhecido'}</h3>
+               <span class="text-[9px] font-extrabold text-slate-500 uppercase bg-slate-100 px-2 py-0.5 rounded-md shrink-0">Data: ${dtStr}</span>
+             </div>
+
+             <p class="text-[11px] text-outline font-mono mb-3">NF: ${item.notas_fiscais || 'N/A'} • Vol: ${item.volumes || 'N/I'}</p>
+
+             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 flex-1">
+               <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Resumo Direto:</p>
+               <div id="obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}" class="text-[11px] text-slate-700 leading-relaxed line-clamp-2 font-medium">${info.textFormatted}</div>
+               <button type="button" onclick="toggleHist('obs-txt-${isMobView ? 'mob' : 'desk'}-${uniqueId}', this)" class="text-[9px] font-extrabold text-primary mt-1 flex items-center">Ler mais</button>
+             </div>
+
+             <div class="flex flex-col gap-2 mt-auto">
+                <button type="button" onclick="abrirModal(stateAlertas[${realIndexState >= 0 ? realIndexState : index}], true)" class="w-full py-2.5 rounded-xl bg-primary text-white text-[10px] font-extrabold active:scale-95 transition-transform shadow-md shadow-primary/20">VISUALIZAR RESUMO</button>
+                <div class="flex gap-1.5 flex-wrap">
+                   <button type="button" onclick="marcarAguardandoLiberacao('${item.id}', '${item.rowIndex || ''}')" title="Aguardando liberação da nota fiscal" class="flex-1 py-2.5 px-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-[9px] font-extrabold active:scale-95 transition-transform hover:bg-purple-100 flex items-center justify-center gap-1 whitespace-nowrap">
+                      <span class="material-symbols-outlined text-[13px]">hourglass_top</span> AGUARDAR NOTA
+                   </button>
+                   <button type="button" onclick="window.open('https://mail.google.com/mail/u/0/#all/' + '${item.id}', '_blank')" class="flex-1 py-2.5 px-2 rounded-xl bg-white border border-slate-200 text-primary text-[9px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 flex items-center justify-center gap-1 whitespace-nowrap">
+                      <span class="material-symbols-outlined text-[13px]">mail</span> GMAIL
+                   </button>
+                   <button type="button" onclick="excluir('${item.id}')" class="px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 text-[9px] font-extrabold active:scale-95 transition-transform hover:bg-slate-50 uppercase">VISTO</button>
+                </div>
+             </div>
+           `;
+           htmlMob += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 w-[85vw] shrink-0 snap-center flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(true)}</div>`;
+           htmlExpanded += `<div class="bg-white rounded-2xl shadow-sm border border-surface-variant/50 border-l-[5px] p-4 flex flex-col relative" style="border-left-color: ${info.borderColor};">${cardBody(false)}</div>`;
+        }
+
+        let collapseColor = info.borderColor === '#dc2626' ? 'bg-red-100 text-red-700' : (info.borderColor === '#9333ea' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-700'); 
         htmlCollapsed += `<div onclick="toggleSidebar()" class="w-10 h-10 rounded-full ${collapseColor} flex items-center justify-center font-extrabold text-sm shadow-sm cursor-pointer border border-slate-200 hover:scale-110 transition-transform shrink-0 mx-auto" title="${info.badge} - ${item.fornecedor}">${avatar.initial}</div>`;
       });
       if(containerMob) containerMob.innerHTML = htmlMob;
-      if(containerDesk) containerDesk.innerHTML = `<div class="expanded-only space-y-4 w-full">${htmlExpanded}</div><div class="collapsed-only flex flex-col items-center gap-3 w-full mt-2">${htmlCollapsed}</div>`;
+      if(containerDesk) containerDesk.innerHTML = `<div class="expanded-only space-y-3 w-full">${htmlExpanded}</div><div class="collapsed-only flex flex-col items-center gap-3 w-full mt-2">${htmlCollapsed}</div>`;
     }
 
     function renderizarAgendamentos(lista) {

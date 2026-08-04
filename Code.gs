@@ -4,8 +4,8 @@ const NOME_ABA = "Agenda";
 // Configurações centralizadas
 const CONFIG = {
   LIMITE_VOLS_PADRAO: 1000,
-  STATUS_VALIDOS: ['PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'CANCELADO', 'EM TRATATIVA'],
-  STATUS_NOTIFICACAO: ['PENDENTE', 'EM TRATATIVA'],
+  STATUS_VALIDOS: ['PENDENTE', 'CONFIRMADO', 'CONCLUÍDO', 'CANCELADO', 'EM TRATATIVA', 'AGUARDANDO LIBERAÇÃO'],
+  STATUS_NOTIFICACAO: ['PENDENTE', 'EM TRATATIVA', 'AGUARDANDO LIBERAÇÃO'],
   STATUS_CONFIRMADO: ['CONFIRMADO'],
   COLUNAS: {
     DATA_REAL: 1,
@@ -370,7 +370,7 @@ function getTodosOsDados() {
       const statusAtual = registro.status;
       
       // Lógica de classificação baseada no status
-      if (statusAtual === 'PENDENTE' || statusAtual === 'EM TRATATIVA') {
+      if (statusAtual === 'PENDENTE' || statusAtual === 'EM TRATATIVA' || statusAtual === 'AGUARDANDO LIBERAÇÃO' || statusAtual === 'AGUARDANDO LIBERACAO') {
         alertas.push(registro);
       } else if (statusAtual === 'CONFIRMADO') {
         agendamentos.push(registro);
