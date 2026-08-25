@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-  <title>Ri Happy | Portal do Promotor & Lojas</title>
+  <title>Ri Happy | Consulta de Entregas & Promotores</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -40,40 +40,24 @@
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     
-    .modal-enter { animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-enter { animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
     
     .notif-container { position: fixed; top: 16px; left: 16px; right: 16px; z-index: 9999; pointer-events: none; display: flex; flex-direction: column; gap: 8px;}
-    @media (min-width: 768px) { .notif-container { left: auto; width: 380px; } }
-    .notif { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); animation: slideDown 0.3s forwards; pointer-events: auto; }
+    @media (min-width: 768px) { .notif-container { left: auto; width: 360px; } }
+    .notif { background: white; padding: 14px 18px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); animation: slideDown 0.3s forwards; pointer-events: auto; }
     @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    
-    .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 12px; }
-    @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    
-    .pattern-stripes {
-      background: repeating-linear-gradient(45deg, #f0fdf4, #f0fdf4 10px, #dcfce7 10px, #dcfce7 20px) !important;
-      border: 1px dashed #22c55e !important;
-    }
-    .past-empty {
-      background-color: #f8fafc !important;
-      opacity: 0.3 !important;
-      filter: grayscale(1);
-    }
-    .dotted-alert {
-      border: 2px dotted #dc2626 !important;
-    }
 
     .status-badge {
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 20px;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
     .status-pendente { background: #fef3c7; color: #92400e; }
     .status-confirmado { background: #dbeafe; color: #1e40af; }
@@ -89,47 +73,34 @@
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none">
-    <div class="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-4 max-w-xs text-center border border-slate-100">
-      <div class="relative flex items-center justify-center">
-        <div class="w-14 h-14 rounded-full border-4 border-slate-100 border-t-primary animate-spin"></div>
-        <span id="loading-icon" class="material-symbols-outlined text-primary text-[24px] absolute">calendar_month</span>
-      </div>
+    <div class="bg-white p-5 rounded-3xl shadow-2xl flex flex-col items-center gap-3 max-w-xs text-center border border-slate-100">
+      <div class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-primary animate-spin"></div>
       <div>
-        <h3 id="loading-title" class="font-extrabold text-slate-800 text-sm">Carregando Calendário...</h3>
-        <p id="loading-message" class="text-[11px] text-slate-400 mt-1 font-medium">Buscando agendamentos atualizados</p>
+        <h3 id="loading-title" class="font-extrabold text-slate-800 text-sm">Consultando Entregas...</h3>
+        <p id="loading-message" class="text-[11px] text-slate-400 mt-0.5">Buscando previsão atualizada</p>
       </div>
     </div>
   </div>
 
-  <!-- HEADER PRINCIPAL -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex justify-between items-center">
+  <!-- HEADER COMPACTO MOBILE & DESKTOP -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-4xl mx-auto px-4 py-2.5 flex justify-between items-center">
       
       <!-- Brand & Título -->
-      <div class="flex items-center gap-3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-7 object-contain">
-        <div class="hidden sm:block h-5 w-px bg-slate-200"></div>
+      <div class="flex items-center gap-2.5">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
+        <div class="h-4 w-px bg-slate-200"></div>
         <div class="flex flex-col">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-black text-slate-800 uppercase tracking-tight font-headline">Portal de Agendamentos</span>
-            <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Promotores & Lojas
-            </span>
-          </div>
-          <span class="text-[10px] text-slate-400 font-semibold" id="header-data-hoje">Hoje, --/--/----</span>
+          <span class="text-xs font-black text-slate-800 font-headline leading-tight">Consulta de Entregas</span>
+          <span class="text-[9px] font-bold text-slate-400">Promotores & Lojas</span>
         </div>
       </div>
 
-      <!-- Ações do Topo -->
+      <!-- Atualizar -->
       <div class="flex items-center gap-2">
-        <button type="button" onclick="gerarTextoWpp()" class="px-3 py-2 bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border border-[#25D366]/30 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-sm" title="Compartilhar resumo no WhatsApp">
-          <span class="material-symbols-outlined text-[18px]">chat</span>
-          <span class="hidden md:inline">Resumo WhatsApp</span>
-        </button>
-
-        <button type="button" onclick="carregarDados(true)" class="p-2 sm:px-3 sm:py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-sm" title="Atualizar dados">
-          <span class="material-symbols-outlined text-[18px] sync-icon">refresh</span>
-          <span class="hidden sm:inline">Atualizar</span>
+        <button type="button" onclick="carregarDados(true)" class="p-2 sm:px-3 sm:py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-xs" title="Atualizar escala">
+          <span class="material-symbols-outlined text-[16px] sync-icon">refresh</span>
+          <span class="hidden sm:inline text-[11px]">Atualizar</span>
         </button>
       </div>
 
@@ -137,157 +108,123 @@
   </header>
 
   <!-- CONTAINER PRINCIPAL -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+  <main class="flex-1 max-w-4xl w-full mx-auto px-3.5 sm:px-6 py-4 space-y-4">
 
-    <!-- CARDS DE KPI -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- RESUMO RÁPIDO COMPACTO EM 1 LINHA -->
+    <div class="bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200 shadow-xs flex items-center justify-between gap-2 overflow-x-auto hide-scrollbar text-xs">
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-red-50 text-primary flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+        </div>
+        <div>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Hoje</span>
+          <span id="mini-hoje" class="font-extrabold text-slate-800 text-xs">0 cargas (0 vols)</span>
+        </div>
+      </div>
+
+      <div class="h-6 w-px bg-slate-200 shrink-0"></div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-[16px]">calendar_view_week</span>
+        </div>
+        <div>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Próximos 7 Dias</span>
+          <span id="mini-semana" class="font-extrabold text-slate-800 text-xs">0 cargas (0 vols)</span>
+        </div>
+      </div>
+
+      <div class="h-6 w-px bg-slate-200 shrink-0 hidden sm:block"></div>
+
+      <div class="hidden sm:flex items-center gap-2 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-[16px]">schedule</span>
+        </div>
+        <div>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Janela de Recebimento</span>
+          <span class="font-extrabold text-slate-800 text-xs">09h às 14h</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAMPO DE BUSCA DESTACADO PARA O PROMOTOR -->
+    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-3">
       
-      <!-- Volumes Hoje -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden">
-        <div class="flex justify-between items-start">
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Volumes Hoje</span>
-          <span class="w-8 h-8 rounded-xl bg-red-50 text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">inventory_2</span></span>
-        </div>
-        <div class="mt-3">
-          <h2 id="kpi-vols-hoje" class="text-2xl sm:text-3xl font-black text-slate-800 leading-none">0</h2>
-          <p id="kpi-cap-info" class="text-[10px] font-bold text-slate-500 mt-1">Limite: <span id="kpi-limite-vols">1.000</span> vols</p>
-        </div>
-        <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-          <div id="kpi-progress-bar" class="bg-primary h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-        </div>
+      <!-- Input de Busca -->
+      <div class="relative">
+        <span class="material-symbols-outlined text-primary absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px]">search</span>
+        <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="🔍 Digite sua marca ou fornecedor (ex: Mattel, Lego, Estrela...)" class="w-full bg-slate-50 border-slate-200 rounded-xl pl-10 pr-10 py-3 text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-primary focus:border-primary shadow-inner">
+        <button type="button" id="btn-limpar-busca" onclick="limparBusca()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+          <span class="material-symbols-outlined text-[18px]">cancel</span>
+        </button>
       </div>
 
-      <!-- Entregas Previstas Hoje -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div class="flex justify-between items-start">
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Cargas Hoje</span>
-          <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">local_shipping</span></span>
-        </div>
-        <div class="mt-3">
-          <h2 id="kpi-entregas-hoje" class="text-2xl sm:text-3xl font-black text-slate-800 leading-none">0</h2>
-          <p class="text-[10px] font-bold text-blue-600 mt-1" id="kpi-fornecedores-hoje">0 fornecedores</p>
-        </div>
-        <div class="mt-3 text-[10px] text-slate-400 font-bold flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span> Horário: 09h às 14h
-        </div>
-      </div>
-
-      <!-- Previsão 7 Dias -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div class="flex justify-between items-start">
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Próximos 7 Dias</span>
-          <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">calendar_view_week</span></span>
-        </div>
-        <div class="mt-3">
-          <h2 id="kpi-vols-semana" class="text-2xl sm:text-3xl font-black text-slate-800 leading-none">0</h2>
-          <p class="text-[10px] font-bold text-slate-500 mt-1"><span id="kpi-cargas-semana">0</span> entregas agendadas</p>
-        </div>
-        <div class="mt-3 text-[10px] text-slate-400 font-bold flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px] text-amber-500">trending_up</span> Previsão semanal
-        </div>
-      </div>
-
-      <!-- Status do Estoque / Inventário -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div class="flex justify-between items-start">
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Estoque / Loja</span>
-          <span id="kpi-status-icon-bg" class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><span id="kpi-status-icon" class="material-symbols-outlined text-[18px]">check_circle</span></span>
-        </div>
-        <div class="mt-3">
-          <h2 id="kpi-status-txt" class="text-lg sm:text-xl font-black text-slate-800 leading-tight">Recebimento Normal</h2>
-          <p id="kpi-status-desc" class="text-[10px] font-bold text-slate-400 mt-1">Capacidade liberada</p>
-        </div>
-        <div class="mt-3 text-[10px] font-bold text-slate-500 truncate" id="kpi-inventario-info">
-          Inventário: Não agendado
+      <!-- Pills de Marcas Frequentes (Filtro Rápido com 1 toque) -->
+      <div class="space-y-1.5">
+        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Marcas em Destaque:</span>
+        <div id="brand-pills-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5">
+          <button type="button" onclick="selecionarMarca('')" class="brand-pill px-3 py-1 bg-slate-800 text-white rounded-full font-black text-[10px] uppercase whitespace-nowrap shadow-xs">Todas</button>
         </div>
       </div>
 
     </div>
 
-    <!-- ABAS DE NAVEGAÇÃO & BUSCA -->
-    <div class="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-6">
+    <!-- NAVEGAÇÃO ENTRE LISTA (PADRÃO) E CALENDÁRIO -->
+    <div class="flex items-center justify-between gap-2">
       
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        
-        <!-- Abas -->
-        <div class="flex gap-2 bg-slate-100 p-1 rounded-2xl shrink-0 w-full sm:w-auto">
-          <button type="button" onclick="mudarAba('calendario')" id="btn-aba-calendario" class="flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-white text-slate-800 shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">calendar_month</span> Calendário
-          </button>
-          <button type="button" onclick="mudarAba('lista')" id="btn-aba-lista" class="flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800">
-            <span class="material-symbols-outlined text-[16px]">format_list_bulleted</span> Lista de Cargas
-          </button>
-        </div>
-
-        <!-- Barra de Busca -->
-        <div class="relative flex-1 max-w-md w-full">
-          <span class="material-symbols-outlined text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px]">search</span>
-          <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="Buscar por Fornecedor ou Nota Fiscal..." class="w-full bg-slate-50 border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-primary focus:border-primary">
-        </div>
-
+      <!-- Abas Switcher -->
+      <div class="flex bg-slate-200/70 p-1 rounded-xl shrink-0 w-full sm:w-auto">
+        <button type="button" onclick="mudarAba('lista')" id="btn-aba-lista" class="flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">format_list_bulleted</span> Lista de Entregas
+        </button>
+        <button type="button" onclick="mudarAba('calendario')" id="btn-aba-calendario" class="flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800">
+          <span class="material-symbols-outlined text-[16px]">calendar_month</span> Calendário
+        </button>
       </div>
 
-      <!-- VISÃO 1: CALENDÁRIO -->
-      <div id="view-calendario" class="space-y-4">
-        
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <h3 id="mes-calendario" class="text-base sm:text-lg font-black text-slate-800 capitalize">Carregando mês...</h3>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="mudarMesCalendario(-1)" class="w-9 h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 active:scale-95 transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
-            <button type="button" onclick="currentDateCal = new Date(); aplicarFiltros();" class="px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-[11px] text-slate-600 uppercase active:scale-95 transition-all shadow-sm">Hoje</button>
-            <button type="button" onclick="mudarMesCalendario(1)" class="w-9 h-9 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 active:scale-95 transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
-          </div>
-        </div>
+    </div>
 
-        <!-- Grade do Calendário -->
-        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-slate-100">
-          <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-slate-200"></div>
-        </div>
+    <!-- FILTROS DE TEMPO (HOJE, AMANHÃ, PRÓXIMAS, PASSADAS) -->
+    <div class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5" id="time-filters-bar">
+      <button type="button" onclick="setTimeFilter('proximas')" id="btn-time-proximas" class="time-filter-btn py-1.5 px-3.5 bg-slate-800 text-white rounded-full font-black text-[11px] uppercase tracking-wider whitespace-nowrap shadow-xs">🚀 Próximas Entregas</button>
+      <button type="button" onclick="setTimeFilter('hoje')" id="btn-time-hoje" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">Hoje</button>
+      <button type="button" onclick="setTimeFilter('amanha')" id="btn-time-amanha" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">Amanhã</button>
+      <button type="button" onclick="setTimeFilter('semana')" id="btn-time-semana" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">Próximos 7 Dias</button>
+      <button type="button" onclick="setTimeFilter('passadas')" id="btn-time-passadas" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">📜 Histórico / Passadas</button>
+    </div>
 
-        <!-- Legenda -->
-        <div class="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-500 pt-2 px-1">
-          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-100 border border-green-300"></span> Livre / Disponível</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-100 border border-blue-300"></span> Com Agendamentos</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-100 border border-red-300"></span> Capacidade Máxima</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-800 text-white flex items-center justify-center text-[7px]">✕</span> Bloqueio Inventário</div>
-        </div>
+    <!-- ============================================================ -->
+    <!-- VISÃO 1: LISTA CRONOLÓGICA DE ENTREGAS (PADRÃO MOBILE-FIRST) -->
+    <!-- ============================================================ -->
+    <div id="view-lista" class="space-y-4">
+      <div id="feed-entregas-container" class="space-y-4"></div>
+    </div>
 
+    <!-- ============================================================ -->
+    <!-- VISÃO 2: CALENDÁRIO MENSAL -->
+    <!-- ============================================================ -->
+    <div id="view-calendario" class="hidden bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-4">
+      
+      <div class="flex items-center justify-between">
+        <h3 id="mes-calendario" class="text-base font-black text-slate-800 capitalize">Mês</h3>
+        <div class="flex items-center gap-1">
+          <button type="button" onclick="mudarMesCalendario(-1)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 active:scale-95 transition-all"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+          <button type="button" onclick="currentDateCal = new Date(); aplicarFiltros();" class="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg font-extrabold text-[10px] text-slate-600 uppercase active:scale-95 transition-all">Hoje</button>
+          <button type="button" onclick="mudarMesCalendario(1)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 active:scale-95 transition-all"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+        </div>
       </div>
 
-      <!-- VISÃO 2: LISTA DE CARGAS -->
-      <div id="view-lista" class="hidden space-y-4">
-        
-        <!-- Filtros Rápidos de Data -->
-        <div class="flex overflow-x-auto hide-scrollbar gap-2 py-1">
-          <button type="button" onclick="setListFilter('todos')" id="btn-filter-todos" class="list-filter-btn py-1.5 px-4 bg-slate-800 text-white rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap shadow-sm">Todos</button>
-          <button type="button" onclick="setListFilter('hoje')" id="btn-filter-hoje" class="list-filter-btn py-1.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap">Hoje</button>
-          <button type="button" onclick="setListFilter('amanha')" id="btn-filter-amanha" class="list-filter-btn py-1.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap">Amanhã</button>
-          <button type="button" onclick="setListFilter('semana')" id="btn-filter-semana" class="list-filter-btn py-1.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap">Próximos 7 Dias</button>
-          <button type="button" onclick="setListFilter('concluidos')" id="btn-filter-concluidos" class="list-filter-btn py-1.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap">Histórico Recebidos</button>
-        </div>
+      <!-- Grade do Calendário -->
+      <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs bg-slate-100">
+        <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-slate-200"></div>
+      </div>
 
-        <!-- Tabela Desktop -->
-        <div class="hidden md:block overflow-x-auto border border-slate-200 rounded-2xl">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                <th class="px-6 py-3.5">Data Prevista</th>
-                <th class="px-6 py-3.5">Fornecedor</th>
-                <th class="px-6 py-3.5">Nota Fiscal</th>
-                <th class="px-6 py-3.5 text-center">Volumes</th>
-                <th class="px-6 py-3.5 text-center">Status</th>
-                <th class="px-6 py-3.5 text-right">Detalhes</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-lista-cargas" class="divide-y divide-slate-100 text-xs font-semibold text-slate-700"></tbody>
-          </table>
-        </div>
-
-        <!-- Cards Mobile -->
-        <div id="cards-lista-cargas" class="md:hidden space-y-3"></div>
-
+      <!-- Legenda Simplificada -->
+      <div class="flex flex-wrap items-center gap-3 text-[9px] font-bold text-slate-500 pt-1">
+        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</div>
+        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-blue-100 border border-blue-300"></span> Com Entregas</div>
+        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-red-100 border border-red-300"></span> Lotado</div>
+        <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-800 text-white flex items-center justify-center text-[6px]">✕</span> Bloqueio Inventário</div>
       </div>
 
     </div>
@@ -298,18 +235,18 @@
   <div id="modal-dia-entregas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl modal-enter overflow-hidden flex flex-col max-h-[85vh]">
       
-      <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
         <div>
-          <h3 id="modal-dia-titulo" class="text-base font-black text-slate-800 leading-none">Entregas do Dia</h3>
+          <h3 id="modal-dia-titulo" class="text-sm sm:text-base font-black text-slate-800 leading-none">Entregas do Dia</h3>
           <p id="modal-dia-subtitulo" class="text-[11px] font-bold text-slate-400 mt-1">--/--/---- • 0 volumes agendados</p>
         </div>
-        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="p-2 bg-white rounded-full text-slate-400 hover:text-slate-700 shadow-sm border border-slate-200"><span class="material-symbols-outlined text-[18px]">close</span></button>
+        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="p-1.5 bg-white rounded-full text-slate-400 hover:text-slate-700 shadow-xs border border-slate-200"><span class="material-symbols-outlined text-[18px]">close</span></button>
       </div>
 
-      <div id="modal-dia-lista" class="p-5 overflow-y-auto custom-scrollbar space-y-3 flex-1"></div>
+      <div id="modal-dia-lista" class="p-4 sm:p-5 overflow-y-auto custom-scrollbar space-y-2.5 flex-1"></div>
 
-      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="w-full sm:w-auto px-6 py-3 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm active:scale-95 transition-all">Fechar</button>
+      <div class="p-3.5 border-t border-slate-100 bg-slate-50 flex justify-end">
+        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="w-full sm:w-auto px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-xs active:scale-95 transition-all">Fechar</button>
       </div>
 
     </div>
@@ -317,58 +254,58 @@
 
   <!-- MODAL DE DETALHES DA CARGA (SOMENTE LEITURA) -->
   <div id="modal-detalhes-carga" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-enter overflow-hidden p-6 space-y-5">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-enter overflow-hidden p-5 sm:p-6 space-y-4">
       
       <div class="flex justify-between items-start">
         <div class="flex items-center gap-3">
           <div id="detalhe-avatar" class="w-10 h-10 rounded-2xl bg-red-100 text-primary font-black text-sm flex items-center justify-center">F</div>
           <div>
             <h3 id="detalhe-fornecedor" class="text-base font-black text-slate-800 leading-tight">Fornecedor</h3>
-            <p id="detalhe-status-pill" class="mt-1"></p>
+            <div id="detalhe-status-pill" class="mt-1"></div>
           </div>
         </div>
         <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="p-1 text-slate-400 hover:text-slate-700"><span class="material-symbols-outlined">close</span></button>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
+      <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
         <div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Data Prevista</span>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Data Prevista</span>
           <span id="detalhe-data" class="font-extrabold text-slate-800 mt-0.5 block">--/--/----</span>
         </div>
         <div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Nota Fiscal (NF)</span>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Nota Fiscal (NF)</span>
           <span id="detalhe-nf" class="font-mono font-extrabold text-slate-800 mt-0.5 block">#000000</span>
         </div>
         <div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Volume Total</span>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Volume Total</span>
           <span id="detalhe-volumes" class="font-extrabold text-primary text-sm mt-0.5 block">0 vol</span>
         </div>
         <div>
-          <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Horário Shopping</span>
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Horário Shopping</span>
           <span class="font-extrabold text-slate-700 mt-0.5 block">09h às 14h</span>
         </div>
       </div>
 
       <div>
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">Observações & Instruções</span>
-        <div id="detalhe-obs" class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 font-medium leading-relaxed max-h-32 overflow-y-auto custom-scrollbar">Nenhuma observação registrada.</div>
+        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">Observações & Instruções</span>
+        <div id="detalhe-obs" class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600 font-medium leading-relaxed max-h-28 overflow-y-auto custom-scrollbar">Nenhuma observação registrada.</div>
       </div>
 
-      <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="w-full py-3.5 bg-slate-800 text-white rounded-2xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all shadow-md">Entendido</button>
+      <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all shadow-sm">Entendido</button>
 
     </div>
   </div>
 
-  <!-- SCRIPT DA PÁGINA DO PROMOTOR -->
+  <!-- SCRIPT DO PORTAL DE PROMOTORES -->
   <script>
-    // Configuração da API do Google Apps Script
     const API_URL_GAS = "https://script.google.com/macros/s/AKfycbwaMMkDnNeUfVvWT2p6iGh47cEuvEa3YcdncLuOAEIgcC0HbXKNByGJcrQ0ZQ52ebxY/exec";
 
     let stateAgendamentos = [];
     let settings = { limite_vols: 1000, data_inventario: "" };
     let currentDateCal = new Date();
-    let abaAtual = 'calendario';
-    let currentListFilter = 'todos';
+    let abaAtual = 'lista';
+    let currentTimeFilter = 'proximas';
+    let marcaSelecionada = '';
 
     const gas = async (fn, ...args) => {
       if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -465,18 +402,34 @@
       if (!d) return str;
       const h = new Date(); h.setHours(0,0,0,0);
       const a = new Date(h); a.setDate(h.getDate() + 1);
+      const o = new Date(h); o.setDate(h.getDate() - 1);
       const t = new Date(d); t.setHours(0,0,0,0);
       if (t.getTime() === h.getTime()) return 'Hoje';
       if (t.getTime() === a.getTime()) return 'Amanhã';
+      if (t.getTime() === o.getTime()) return 'Ontem';
       const dia = String(d.getDate()).padStart(2, '0');
       const mes = String(d.getMonth() + 1).padStart(2, '0');
       const ano = d.getFullYear();
       return `${dia}/${mes}/${ano}`;
     }
 
+    function calcularBadgeTempo(dtObj) {
+      if (!dtObj) return { text: '', color: 'bg-slate-100 text-slate-600' };
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      const dataAlvo = new Date(dtObj); dataAlvo.setHours(0,0,0,0);
+      const diffDias = Math.round((dataAlvo - hoje) / 86400000);
+
+      if (diffDias === 0) return { text: '🚨 Chega Hoje!', color: 'bg-red-100 text-red-700 font-black border border-red-200 animate-pulse' };
+      if (diffDias === 1) return { text: '⚡ Chega Amanhã', color: 'bg-amber-100 text-amber-800 font-extrabold border border-amber-200' };
+      if (diffDias > 1 && diffDias <= 6) return { text: `Em ${diffDias} dias`, color: 'bg-blue-50 text-blue-700 font-bold border border-blue-200' };
+      if (diffDias > 6) return { text: 'Próxima semana', color: 'bg-slate-100 text-slate-600 font-bold' };
+      if (diffDias === -1) return { text: 'Ontem', color: 'bg-slate-100 text-slate-500' };
+      return { text: 'Passado', color: 'bg-slate-100 text-slate-400' };
+    }
+
     const getAvatarStyle = (nome) => {
       const initial = (nome || 'F').charAt(0).toUpperCase();
-      const cores = ['bg-red-100 text-red-700', 'bg-blue-100 text-blue-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-purple-100 text-purple-700'];
+      const cores = ['bg-red-100 text-red-700', 'bg-blue-100 text-blue-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-purple-100 text-purple-700', 'bg-pink-100 text-pink-700'];
       return { initial, colorClass: cores[initial.charCodeAt(0) % cores.length] };
     };
 
@@ -497,34 +450,37 @@
 
     function mudarAba(aba) {
       abaAtual = aba;
-      const viewCal = document.getElementById('view-calendario');
       const viewList = document.getElementById('view-lista');
-      const btnCal = document.getElementById('btn-aba-calendario');
+      const viewCal = document.getElementById('view-calendario');
       const btnList = document.getElementById('btn-aba-lista');
+      const btnCal = document.getElementById('btn-aba-calendario');
+      const timeBar = document.getElementById('time-filters-bar');
 
-      if (aba === 'calendario') {
-        if(viewCal) viewCal.classList.remove('hidden');
-        if(viewList) viewList.classList.add('hidden');
-        btnCal.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-white text-slate-800 shadow-sm";
-        btnList.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800";
-      } else {
-        if(viewCal) viewCal.classList.add('hidden');
+      if (aba === 'lista') {
         if(viewList) viewList.classList.remove('hidden');
-        btnList.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-white text-slate-800 shadow-sm";
-        btnCal.className = "flex-1 sm:flex-initial py-2.5 px-5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-800";
+        if(viewCal) viewCal.classList.add('hidden');
+        if(timeBar) timeBar.classList.remove('hidden');
+        btnList.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
+        btnCal.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
+      } else {
+        if(viewList) viewList.classList.add('hidden');
+        if(viewCal) viewCal.classList.remove('hidden');
+        if(timeBar) timeBar.classList.add('hidden');
+        btnCal.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
+        btnList.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
       }
     }
 
-    function setListFilter(filtro) {
-      currentListFilter = filtro;
-      const botoes = ['todos', 'hoje', 'amanha', 'semana', 'concluidos'];
+    function setTimeFilter(filtro) {
+      currentTimeFilter = filtro;
+      const botoes = ['proximas', 'hoje', 'amanha', 'semana', 'passadas'];
       botoes.forEach(b => {
-        const btn = document.getElementById(`btn-filter-${b}`);
-        if(btn) {
-          if(b === filtro) {
-            btn.className = "list-filter-btn py-1.5 px-4 bg-slate-800 text-white rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap shadow-sm";
+        const btn = document.getElementById(`btn-time-${b}`);
+        if (btn) {
+          if (b === filtro) {
+            btn.className = "time-filter-btn py-1.5 px-3.5 bg-slate-800 text-white rounded-full font-black text-[11px] uppercase tracking-wider whitespace-nowrap shadow-xs";
           } else {
-            btn.className = "list-filter-btn py-1.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-full font-black text-xs uppercase tracking-wider whitespace-nowrap";
+            btn.className = "time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap";
           }
         }
       });
@@ -536,11 +492,61 @@
       aplicarFiltros();
     }
 
+    function limparBusca() {
+      const input = document.getElementById('search-input');
+      if (input) {
+        input.value = '';
+        document.getElementById('btn-limpar-busca').classList.add('hidden');
+      }
+      marcaSelecionada = '';
+      atualizarPillsMarcas();
+      aplicarFiltros();
+    }
+
+    function selecionarMarca(marca) {
+      marcaSelecionada = marca;
+      const input = document.getElementById('search-input');
+      if (input) {
+        input.value = marca;
+        if (marca) document.getElementById('btn-limpar-busca').classList.remove('hidden');
+        else document.getElementById('btn-limpar-busca').classList.add('hidden');
+      }
+      atualizarPillsMarcas();
+      aplicarFiltros();
+    }
+
+    function atualizarPillsMarcas() {
+      const container = document.getElementById('brand-pills-container');
+      if (!container) return;
+
+      // Pega marcas únicas mais frequentes dos agendamentos
+      const contagemMarcas = {};
+      stateAgendamentos.forEach(item => {
+        const f = (item.fornecedor || '').trim();
+        if (f && f !== 'Não Informado' && f.length > 2) {
+          contagemMarcas[f] = (contagemMarcas[f] || 0) + 1;
+        }
+      });
+
+      const topMarcas = Object.keys(contagemMarcas)
+        .sort((a, b) => contagemMarcas[b] - contagemMarcas[a])
+        .slice(0, 10);
+
+      let html = `<button type="button" onclick="selecionarMarca('')" class="brand-pill px-3 py-1 ${marcaSelecionada === '' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} rounded-full font-black text-[10px] uppercase whitespace-nowrap shadow-xs transition-all">Todas</button>`;
+
+      topMarcas.forEach(m => {
+        const isSel = (marcaSelecionada.toLowerCase() === m.toLowerCase());
+        html += `<button type="button" onclick="selecionarMarca('${m.replace(/'/g, "\\'")}')" class="brand-pill px-3 py-1 ${isSel ? 'bg-primary text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} rounded-full font-bold text-[10px] whitespace-nowrap transition-all">${m}</button>`;
+      });
+
+      container.innerHTML = html;
+    }
+
     // ============================================================
     // CARREGAR DADOS DA API
     // ============================================================
     async function carregarDados(mostrarOverlay = true) {
-      if (mostrarOverlay) mostrarLoading("Atualizando...", "Buscando dados de agendamentos...");
+      if (mostrarOverlay) mostrarLoading("Atualizando...", "Buscando previsão de entregas...");
       const syncIcons = document.querySelectorAll('.sync-icon');
       syncIcons.forEach(icon => icon.classList.add('animate-spin'));
 
@@ -550,7 +556,6 @@
         settings = s || { limite_vols: 1000, data_inventario: "" };
         stateAgendamentos = payload.agendamentos || [];
 
-        // Concatena alertas pendentes caso queira mostrar previsões em aberto
         if (payload.alertas && Array.isArray(payload.alertas)) {
           stateAgendamentos = [...stateAgendamentos, ...payload.alertas];
         }
@@ -562,14 +567,15 @@
         });
         stateAgendamentos = Array.from(idMap.values());
 
-        // Ordena por data agendada
+        // Ordena por data
         stateAgendamentos.sort((a, b) => {
           const d1 = parseSafeDate(a.data_agendada || a.data_real) || new Date('2099-01-01');
           const d2 = parseSafeDate(b.data_agendada || b.data_real) || new Date('2099-01-01');
           return d1 - d2;
         });
 
-        atualizarKPIs();
+        atualizarResumoCompacto();
+        atualizarPillsMarcas();
         aplicarFiltros();
       } catch (e) {
         notify('Aviso', 'Não foi possível atualizar os dados agora.', 'warning');
@@ -579,98 +585,203 @@
       }
     }
 
-    // ============================================================
-    // ATUALIZAÇÃO DOS KPIS
-    // ============================================================
-    function atualizarKPIs() {
+    function atualizarResumoCompacto() {
       const hoje = new Date(); hoje.setHours(0,0,0,0);
-      const limite = Number(settings.limite_vols) || 1000;
-      if(document.getElementById('kpi-limite-vols')) document.getElementById('kpi-limite-vols').innerText = limite.toLocaleString('pt-BR');
+      const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate() + 7);
 
-      // 1. Cargas e Volumes Hoje
       const cargasHoje = stateAgendamentos.filter(i => {
         const dt = parseSafeDate(i.data_agendada || i.data_real);
         return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear() && (i.status || '').toUpperCase() !== 'CANCELADO';
       });
+      const volsHoje = cargasHoje.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
+      document.getElementById('mini-hoje').innerText = `${cargasHoje.length} carga(s) • ${volsHoje} vols`;
 
-      const volsHoje = cargasHoje.reduce((acc, item) => acc + (Number(item.volumes) || 0), 0);
-      const fornecedoresUnicos = new Set(cargasHoje.map(i => i.fornecedor)).size;
-
-      document.getElementById('kpi-vols-hoje').innerText = volsHoje.toLocaleString('pt-BR');
-      document.getElementById('kpi-entregas-hoje').innerText = cargasHoje.length;
-      document.getElementById('kpi-fornecedores-hoje').innerText = `${fornecedoresUnicos} fornecedor(es)`;
-
-      const percCap = Math.min(Math.round((volsHoje / limite) * 100), 100);
-      const bar = document.getElementById('kpi-progress-bar');
-      if (bar) {
-        bar.style.width = `${percCap}%`;
-        bar.className = `h-full rounded-full transition-all duration-500 ${volsHoje > limite ? 'bg-red-600' : (percCap > 75 ? 'bg-amber-500' : 'bg-emerald-500')}`;
-      }
-
-      // 2. Previsão dos Próximos 7 Dias
-      const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate() + 7);
       const cargasSemana = stateAgendamentos.filter(i => {
         const dt = parseSafeDate(i.data_agendada || i.data_real);
         return dt && dt >= hoje && dt <= em7Dias && (i.status || '').toUpperCase() !== 'CANCELADO';
       });
-      const volsSemana = cargasSemana.reduce((acc, item) => acc + (Number(item.volumes) || 0), 0);
-
-      document.getElementById('kpi-vols-semana').innerText = volsSemana.toLocaleString('pt-BR');
-      document.getElementById('kpi-cargas-semana').innerText = cargasSemana.length;
-
-      // 3. Status de Inventário & Capacidade
-      const invDate = parseSafeDate(settings.data_inventario);
-      let isBlackout = false;
-      if (invDate) {
-        const diffDays = Math.abs(Math.floor((hoje - invDate) / 86400000));
-        if (diffDays <= 1) isBlackout = true;
-        const diaInv = String(invDate.getDate()).padStart(2,'0');
-        const mesInv = String(invDate.getMonth()+1).padStart(2,'0');
-        document.getElementById('kpi-inventario-info').innerText = `Inventário: ${diaInv}/${mesInv}/${invDate.getFullYear()}`;
-      } else {
-        document.getElementById('kpi-inventario-info').innerText = 'Inventário: Não agendado';
-      }
-
-      const statusTxt = document.getElementById('kpi-status-txt');
-      const statusDesc = document.getElementById('kpi-status-desc');
-      const statusIcon = document.getElementById('kpi-status-icon');
-      const statusBg = document.getElementById('kpi-status-icon-bg');
-
-      if (isBlackout) {
-        statusTxt.innerText = "Bloqueio de Inventário";
-        statusDesc.innerText = "Recebimento suspenso";
-        statusIcon.innerText = "block";
-        statusBg.className = "w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center";
-      } else if (volsHoje >= limite) {
-        statusTxt.innerText = "Capacidade Máxima";
-        statusDesc.innerText = "Estoque com limite atingido";
-        statusIcon.innerText = "warning";
-        statusBg.className = "w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center";
-      } else {
-        statusTxt.innerText = "Recebimento Normal";
-        statusDesc.innerText = "Operação liberada";
-        statusIcon.innerText = "check_circle";
-        statusBg.className = "w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center";
-      }
+      const volsSemana = cargasSemana.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
+      document.getElementById('mini-semana').innerText = `${cargasSemana.length} carga(s) • ${volsSemana} vols`;
     }
 
     // ============================================================
-    // RENDERIZAR CALENDÁRIO E LISTA COM FILTROS
+    // FILTROS & RENDERIZAÇÃO DO FEED DE ENTREGAS
     // ============================================================
     function aplicarFiltros() {
       const searchInput = document.getElementById('search-input');
       const termo = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const clearBtn = document.getElementById('btn-limpar-busca');
+      if (clearBtn) {
+        if (termo) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      const amanha = new Date(hoje); amanha.setDate(amanha.getDate() + 1);
+      const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate() + 7);
 
       let filtrados = stateAgendamentos.filter(i => {
-        if (!termo) return true;
-        return (i.fornecedor || '').toLowerCase().includes(termo) || 
-               (i.notas_fiscais || '').toLowerCase().includes(termo);
+        // Filtro por termo (Marca / Fornecedor ou NF)
+        if (termo) {
+          const matchForn = (i.fornecedor || '').toLowerCase().includes(termo);
+          const matchNf = (i.notas_fiscais || '').toLowerCase().includes(termo);
+          if (!matchForn && !matchNf) return false;
+        }
+
+        const dt = parseSafeDate(i.data_agendada || i.data_real);
+        const isCancelado = (i.status || '').toUpperCase() === 'CANCELADO';
+        if (isCancelado && currentTimeFilter !== 'passadas') return false;
+
+        const isConcluido = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes((i.status || '').toUpperCase());
+
+        if (currentTimeFilter === 'proximas') {
+          // Hoje em diante (não recebidas) OU recebidas hoje
+          return dt && (dt >= hoje || (dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear()));
+        } else if (currentTimeFilter === 'hoje') {
+          return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear();
+        } else if (currentTimeFilter === 'amanha') {
+          return dt && dt.getDate() === amanha.getDate() && dt.getMonth() === amanha.getMonth() && dt.getFullYear() === amanha.getFullYear();
+        } else if (currentTimeFilter === 'semana') {
+          return dt && dt >= hoje && dt <= em7Dias;
+        } else if (currentTimeFilter === 'passadas') {
+          return (dt && dt < hoje) || isConcluido;
+        }
+
+        return true;
       });
 
+      renderizarFeedEntregas(filtrados);
       renderizarCalendario(filtrados);
-      renderizarListaCargas(filtrados);
     }
 
+    function renderizarFeedEntregas(lista) {
+      const container = document.getElementById('feed-entregas-container');
+      if (!container) return;
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs space-y-3">
+            <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-[28px]">search_off</span>
+            </div>
+            <div>
+              <h4 class="font-extrabold text-slate-800 text-sm">Nenhuma entrega encontrada</h4>
+              <p class="text-xs text-slate-400 mt-1">Verifique o nome da marca ou altere o filtro de data acima.</p>
+            </div>
+            <button type="button" onclick="limparBusca(); setTimeFilter('proximas');" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">Ver Todas as Próximas</button>
+          </div>
+        `;
+        return;
+      }
+
+      // Agrupa os itens por data para leitura cronológica perfeita
+      const gruposPorData = new Map();
+      lista.forEach(item => {
+        const dt = parseSafeDate(item.data_agendada || item.data_real);
+        const chave = dt ? dt.toISOString().split('T')[0] : 'sem_data';
+        if (!gruposPorData.has(chave)) {
+          gruposPorData.set(chave, []);
+        }
+        gruposPorData.get(chave).push(item);
+      });
+
+      let html = '';
+      for (const [chaveData, itens] of gruposPorData) {
+        let tituloGrupo = 'Sem Data Definida';
+        let subGrupo = '';
+        let headerColor = 'text-slate-800';
+
+        if (chaveData !== 'sem_data') {
+          const dtObj = new Date(chaveData + 'T00:00:00');
+          const hum = formatarDataHumanizada(dtObj);
+          const diaSemana = dtObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+          const diaMes = `${String(dtObj.getDate()).padStart(2,'0')}/${String(dtObj.getMonth()+1).padStart(2,'0')}`;
+
+          if (hum === 'Hoje') {
+            tituloGrupo = `🚨 HOJE • ${diaMes}`;
+            subGrupo = `(Recebimento no estoque das 09h às 14h)`;
+            headerColor = 'text-primary';
+          } else if (hum === 'Amanhã') {
+            tituloGrupo = `⚡ AMANHÃ • ${diaMes}`;
+            subGrupo = `(${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)})`;
+            headerColor = 'text-amber-600';
+          } else {
+            tituloGrupo = `📅 ${diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)} • ${diaMes}`;
+            subGrupo = '';
+            headerColor = 'text-slate-800';
+          }
+        }
+
+        const totalVolsGrupo = itens.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
+
+        html += `
+          <div class="space-y-2.5">
+            
+            <!-- Cabeçalho do Dia -->
+            <div class="flex items-baseline justify-between px-1">
+              <div class="flex items-baseline gap-1.5 flex-wrap">
+                <h3 class="text-xs sm:text-sm font-black ${headerColor} uppercase tracking-tight">${tituloGrupo}</h3>
+                ${subGrupo ? `<span class="text-[10px] font-bold text-slate-400">${subGrupo}</span>` : ''}
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">${itens.length} carga(s) • ${totalVolsGrupo} vols</span>
+            </div>
+
+            <!-- Cards de Entrega do Dia -->
+            <div class="space-y-2">
+        `;
+
+        itens.forEach(item => {
+          const realIdx = stateAgendamentos.findIndex(x => x.id === item.id);
+          const av = getAvatarStyle(item.fornecedor);
+          const dtObj = parseSafeDate(item.data_agendada || item.data_real);
+          const badgeTempo = calcularBadgeTempo(dtObj);
+          const badgeStatus = getStatusBadge(item.status);
+
+          html += `
+            <div onclick="abrirDetalheCarga(${realIdx})" class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 active:scale-[0.99] transition-all cursor-pointer flex flex-col gap-2.5">
+              
+              <div class="flex justify-between items-start gap-2">
+                <div class="flex items-center gap-3 overflow-hidden">
+                  <div class="w-10 h-10 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-sm shrink-0 shadow-xs">${av.initial}</div>
+                  <div class="overflow-hidden">
+                    <h4 class="font-extrabold text-slate-800 text-sm sm:text-base truncate leading-tight">${item.fornecedor || 'Fornecedor Não Informado'}</h4>
+                    <p class="text-[11px] text-slate-500 font-mono mt-0.5">Nota Fiscal: <strong class="text-slate-700">#${item.notas_fiscais || 'S/N'}</strong></p>
+                  </div>
+                </div>
+
+                <div class="shrink-0 flex flex-col items-end gap-1">
+                  ${badgeStatus}
+                  <span class="text-[9px] px-2 py-0.5 rounded-md ${badgeTempo.color}">${badgeTempo.text}</span>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center pt-2.5 border-t border-slate-100 text-xs">
+                <div class="flex items-center gap-1.5 text-slate-600 font-bold">
+                  <span class="material-symbols-outlined text-[15px] text-primary">inventory_2</span>
+                  <span>Volume: <strong class="text-slate-900 font-black">${item.volumes || 0}</strong> cx/vol</span>
+                </div>
+
+                <span class="text-[11px] font-extrabold text-primary flex items-center gap-0.5">
+                  Ver detalhes <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                </span>
+              </div>
+
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ============================================================
+    // CALENDÁRIO MENSAL (COMPACTO)
+    // ============================================================
     function renderizarCalendario(lista) {
       const grid = document.getElementById('calendar-grid');
       if (!grid) return;
@@ -687,11 +798,11 @@
 
       let html = '';
       ['DOM','SEG','TER','QUA','QUI','SEX','SAB'].forEach(d => {
-        html += `<div class="bg-white py-2 text-center text-[9px] font-black text-slate-400">${d}</div>`;
+        html += `<div class="bg-white py-1.5 text-center text-[9px] font-black text-slate-400">${d}</div>`;
       });
 
       for (let i = 0; i < primeiroDia; i++) {
-        html += `<div class="bg-slate-50/50 min-h-[60px] sm:min-h-[85px]"></div>`;
+        html += `<div class="bg-slate-50/50 min-h-[55px] sm:min-h-[75px]"></div>`;
       }
 
       const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -717,121 +828,33 @@
         const volsDia = entsDia.reduce((acc, i) => acc + (Number(i.volumes) || 0), 0);
 
         let bg = 'bg-white';
-        let txtColor = 'text-slate-800';
         let badgeHtml = '';
 
         if (isBlackout) {
           bg = 'bg-slate-900 text-white';
-          badgeHtml = `<span class="text-[7px] sm:text-[8px] font-black uppercase text-slate-300">Bloqueio</span>`;
+          badgeHtml = `<span class="text-[7px] font-black uppercase text-slate-300">Bloqueio</span>`;
         } else if (volsDia > 0) {
           if (volsDia > limite) {
-            bg = 'bg-red-50 text-red-700 border-red-200';
-            badgeHtml = `<span class="text-[8px] sm:text-[9px] font-black text-red-600">${volsDia} <span class="text-[7px] font-medium opacity-70">vols</span></span>`;
+            bg = 'bg-red-50 text-red-700';
+            badgeHtml = `<span class="text-[8px] font-black text-red-600">${volsDia}v</span>`;
           } else {
-            bg = 'bg-blue-50 text-blue-800 border-blue-100';
-            badgeHtml = `<span class="text-[8px] sm:text-[9px] font-black text-blue-700">${volsDia} <span class="text-[7px] font-medium opacity-70">vols</span></span>`;
+            bg = 'bg-blue-50 text-blue-800';
+            badgeHtml = `<span class="text-[8px] font-black text-blue-700">${volsDia}v</span>`;
           }
         } else {
-          if (isPast) bg = 'bg-slate-50/70 text-slate-400 opacity-40';
-          else if (!isWeekend) badgeHtml = `<span class="text-[7px] sm:text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded">Livre</span>`;
+          if (isPast) bg = 'bg-slate-50/60 opacity-30';
+          else if (!isWeekend) badgeHtml = `<span class="text-[7px] font-bold text-emerald-600">Livre</span>`;
         }
 
         html += `
-          <button type="button" onclick="abrirModalDia(${ano}, ${mes}, ${d})" class="${bg} p-1 sm:p-2 min-h-[60px] sm:min-h-[85px] flex flex-col justify-between items-center text-center relative hover:shadow-inner active:scale-95 transition-all cursor-pointer">
-            <div class="w-full flex justify-between items-center">
-              <span class="text-[9px] sm:text-[11px] font-black ${isToday ? 'w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shadow-sm' : 'text-slate-500'}">${d}</span>
-              ${entsDia.length > 0 ? `<span class="text-[7px] sm:text-[8px] font-bold text-slate-400 hidden sm:inline">${entsDia.length} car.</span>` : ''}
-            </div>
-            <div class="my-auto py-0.5">${badgeHtml}</div>
+          <button type="button" onclick="abrirModalDia(${ano}, ${mes}, ${d})" class="${bg} p-1 min-h-[55px] sm:min-h-[75px] flex flex-col justify-between items-center text-center relative hover:shadow-inner active:scale-95 transition-all cursor-pointer">
+            <span class="text-[9px] sm:text-[10px] font-black ${isToday ? 'w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center' : 'text-slate-500'}">${d}</span>
+            <div class="my-auto">${badgeHtml}</div>
           </button>
         `;
       }
 
       grid.innerHTML = html;
-    }
-
-    function renderizarListaCargas(lista) {
-      const containerDesk = document.getElementById('tabela-lista-cargas');
-      const containerMob = document.getElementById('cards-lista-cargas');
-      if (!containerDesk && !containerMob) return;
-
-      const hoje = new Date(); hoje.setHours(0,0,0,0);
-      const amanha = new Date(hoje); amanha.setDate(amanha.getDate() + 1);
-      const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate() + 7);
-
-      let filtrados = lista.filter(i => {
-        const dt = parseSafeDate(i.data_agendada || i.data_real);
-        const isRec = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes((i.status || '').toUpperCase());
-
-        if (currentListFilter === 'hoje') {
-          return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear();
-        } else if (currentListFilter === 'amanha') {
-          return dt && dt.getDate() === amanha.getDate() && dt.getMonth() === amanha.getMonth() && dt.getFullYear() === amanha.getFullYear();
-        } else if (currentListFilter === 'semana') {
-          return dt && dt >= hoje && dt <= em7Dias;
-        } else if (currentListFilter === 'concluidos') {
-          return isRec;
-        }
-        return true;
-      });
-
-      if (filtrados.length === 0) {
-        const empty = `<tr><td colspan="6" class="text-center py-12 text-slate-400 font-bold">Nenhum agendamento encontrado para este filtro.</td></tr>`;
-        if (containerDesk) containerDesk.innerHTML = empty;
-        if (containerMob) containerMob.innerHTML = `<div class="bg-slate-50 rounded-2xl p-8 text-center text-slate-400 font-bold text-xs">Nenhum agendamento encontrado.</div>`;
-        return;
-      }
-
-      // Tabela Desktop
-      if (containerDesk) {
-        containerDesk.innerHTML = filtrados.map((i, idx) => {
-          const av = getAvatarStyle(i.fornecedor);
-          const dtHum = formatarDataHumanizada(i.data_agendada || i.data_real);
-          const badge = getStatusBadge(i.status);
-
-          return `
-            <tr class="hover:bg-slate-50/80 transition-colors">
-              <td class="px-6 py-4 font-black text-slate-800">${dtHum}</td>
-              <td class="px-6 py-4 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-xs shrink-0">${av.initial}</div>
-                <span class="font-extrabold text-slate-800">${i.fornecedor || 'Não Informado'}</span>
-              </td>
-              <td class="px-6 py-4 font-mono text-outline text-xs">#${i.notas_fiscais || '-'}</td>
-              <td class="px-6 py-4 text-center font-black text-primary">${i.volumes || 0}</td>
-              <td class="px-6 py-4 text-center">${badge}</td>
-              <td class="px-6 py-4 text-right">
-                <button type="button" onclick="abrirDetalheCarga(${idx})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 font-bold text-[11px] transition-all">Ver Detalhes</button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      // Cards Mobile
-      if (containerMob) {
-        containerMob.innerHTML = filtrados.map((i, idx) => {
-          const av = getAvatarStyle(i.fornecedor);
-          const dtHum = formatarDataHumanizada(i.data_agendada || i.data_real);
-          const badge = getStatusBadge(i.status);
-
-          return `
-            <div onclick="abrirDetalheCarga(${idx})" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 cursor-pointer active:scale-98 transition-transform">
-              <div class="flex justify-between items-center">
-                <span class="text-xs font-black text-slate-700 flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-primary">event</span> ${dtHum}</span>
-                ${badge}
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full ${av.colorClass} flex items-center justify-center font-bold text-sm shrink-0">${av.initial}</div>
-                <div class="flex-1 overflow-hidden">
-                  <h4 class="font-black text-slate-800 text-sm truncate">${i.fornecedor || 'Não Informado'}</h4>
-                  <p class="text-[11px] text-slate-500 font-mono mt-0.5">NF: #${i.notas_fiscais || '-'} • Vol: ${i.volumes || 0}</p>
-                </div>
-                <span class="material-symbols-outlined text-slate-300 text-[20px]">chevron_right</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
     }
 
     // ============================================================
@@ -852,23 +875,23 @@
       const listaEl = document.getElementById('modal-dia-lista');
       if (entregas.length === 0) {
         listaEl.innerHTML = `
-          <div class="text-center py-10 text-slate-400 font-bold text-xs">
-            <span class="material-symbols-outlined text-4xl text-slate-300 mb-2 block">event_available</span>
+          <div class="text-center py-8 text-slate-400 font-bold text-xs">
+            <span class="material-symbols-outlined text-3xl text-slate-300 mb-1 block">event_available</span>
             Nenhuma entrega agendada para este dia.
           </div>
         `;
       } else {
-        listaEl.innerHTML = entregas.map((i, idx) => {
+        listaEl.innerHTML = entregas.map(i => {
           const av = getAvatarStyle(i.fornecedor);
           const badge = getStatusBadge(i.status);
 
           return `
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 overflow-hidden">
-                <div class="w-9 h-9 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-xs shrink-0">${av.initial}</div>
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <div class="w-8 h-8 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-xs shrink-0">${av.initial}</div>
                 <div class="overflow-hidden">
-                  <h4 class="font-black text-slate-800 text-xs truncate">${i.fornecedor || 'Desconhecido'}</h4>
-                  <p class="text-[10px] text-slate-500 font-mono mt-0.5">NF: #${i.notas_fiscais || '-'} • Vol: <strong class="text-primary">${i.volumes || 0}</strong></p>
+                  <h4 class="font-extrabold text-slate-800 text-xs truncate">${i.fornecedor || 'Desconhecido'}</h4>
+                  <p class="text-[10px] text-slate-500 font-mono">NF: #${i.notas_fiscais || '-'} • Vol: <strong class="text-primary">${i.volumes || 0}</strong></p>
                 </div>
               </div>
               <div class="shrink-0">${badge}</div>
@@ -901,45 +924,8 @@
       abrirModalGenerico('modal-detalhes-carga');
     }
 
-    // ============================================================
-    // COMPARTILHAMENTO WHATSAPP
-    // ============================================================
-    function gerarTextoWpp() {
-      const hoje = new Date(); hoje.setHours(0,0,0,0);
-      const diaStr = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
-      
-      const cargasHoje = stateAgendamentos.filter(i => {
-        const dt = parseSafeDate(i.data_agendada || i.data_real);
-        return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear() && (i.status || '').toUpperCase() !== 'CANCELADO';
-      });
-
-      let txt = `📦 *PREVISÃO DE ENTREGAS RI HAPPY - ${diaStr}*\n`;
-      txt += `Total de Cargas: *${cargasHoje.length}* | Volumes: *${cargasHoje.reduce((a,b)=>a+(Number(b.volumes)||0),0)}*\n\n`;
-
-      if (cargasHoje.length === 0) {
-        txt += `_Nenhuma entrega agendada para hoje._\n`;
-      } else {
-        cargasHoje.forEach((i, idx) => {
-          txt += `${idx+1}. *${i.fornecedor}* - ${i.volumes} vol (NF: ${i.notas_fiscais})\n`;
-        });
-      }
-
-      txt += `\n⏰ *Horário de Recebimento:* 09h às 14h\n`;
-      txt += `🔗 _Consulte a escala completa no Portal do Promotor:_ ${window.location.href}`;
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(txt);
-        notify('Copiado!', 'Resumo formatado copiado para a área de transferência.', 'success');
-      } else {
-        prompt('Copie o resumo para o WhatsApp:', txt);
-      }
-    }
-
     // Inicialização ao carregar
     window.addEventListener('DOMContentLoaded', () => {
-      const hoje = new Date();
-      const dataFormatada = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      document.getElementById('header-data-hoje').innerText = dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
       carregarDados(true);
     });
   </script>
