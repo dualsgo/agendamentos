@@ -654,6 +654,10 @@ function atualizarAgendamento(rowIndex, dados) {
       'volumes': 4,
       'notas_fiscais': 3,
       'fornecedor': 2,
+      'origem': 8,
+      'id': 9,
+      'remetente': 10,
+      'assunto': 11,
       'vols_recebidos': 12,
       'resumo_direto': 13
     };
@@ -712,11 +716,28 @@ function responderEmail(id, mensagem) {
   lock.waitLock(15000);
   try {
     if (!id || !mensagem) return "ERRO: ID ou mensagem ausente.";
-    const thread = GmailApp.getThreadById(id.trim());
-    if (!thread) return "ERRO: E-mail não encontrado no Gmail.";
+    
+    let threadId = String(id).trim();
+    if (threadId.includes("mail.google.com") || threadId.includes("#")) {
+      const match = threadId.match(/#(?:all|inbox|sent|starred|trash|search\/[^/]+|label\/[^/]+|category\/[^/]+)?\/?([a-zA-Z0-9_-]{10,})/i);
+      if (match && match[1]) {
+        threadId = match[1];
+      } else {
+        const urlSegments = threadId.split(/[/?#]/).filter(Boolean);
+        for (let i = urlSegments.length - 1; i >= 0; i--) {
+          if (/^[a-zA-Z0-9_-]{10,}$/.test(urlSegments[i])) {
+            threadId = urlSegments[i];
+            break;
+          }
+        }
+      }
+    }
+    
+    const thread = GmailApp.getThreadById(threadId);
+    if (!thread) return "ERRO: E-mail não encontrado no Gmail com o ID fornecido (" + threadId + ").";
     
     thread.reply(mensagem);
-    logAcao('responderEmail', { id }, 'OK');
+    logAcao('responderEmail', { id: threadId }, 'OK');
     return "OK";
   } catch (e) {
     logAcao('responderEmail', { id }, 'ERRO: ' + e.message);
@@ -733,8 +754,29 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
     const sheet = inicializarPlanilha();
     const data = sheet.getDataRange().getValues();
     
-    const providedId = dados.id || dados.email_id || dados.id_email || dados.message_id || "";
-    let targetRow = getTargetRow(providedId, data, dados.assunto);
+    let providedId = dados.id || dados.email_id || dados.id_email || dados.message_id || dados.gmail_link || "";
+    if (providedId && (providedId.includes("mail.google.com") || providedId.includes("#"))) {
+      const match = providedId.match(/#(?:all|inbox|sent|starred|trash|search\/[^/]+|label\/[^/]+|category\/[^/]+)?\/?([a-zA-Z0-9_-]{10,})/i);
+      if (match && match[1]) {
+        providedId = match[1];
+      } else {
+        const urlSegments = providedId.split(/[/?#]/).filter(Boolean);
+        for (let i = urlSegments.length - 1; i >= 0; i--) {
+          if (/^[a-zA-Z0-9_-]{10,}$/.test(urlSegments[i])) {
+            providedId = urlSegments[i];
+            break;
+          }
+        }
+      }
+    }
+
+    let targetRow = -1;
+    if (dados.rowIndex && Number(dados.rowIndex) > 1 && Number(dados.rowIndex) <= sheet.getLastRow()) {
+      targetRow = Number(dados.rowIndex);
+    } else {
+      targetRow = getTargetRow(providedId, data, dados.assunto);
+    }
+
     const idUnico = providedId || Utilities.getUuid();
     
     let dtAgendada = null;
@@ -761,6 +803,8 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
       if (dados.remetente) updateData.remetente = dados.remetente;
       if (dados.assunto) updateData.assunto = dados.assunto;
       if (dados.resumo_direto) updateData.resumo_direto = dados.resumo_direto;
+      if (providedId) updateData.id = providedId;
+      if (dados.origem) updateData.origem = dados.origem;
       
       const currentData = sheet.getRange(targetRow, 1, 1, sheet.getLastColumn()).getValues()[0];
       const mapeamento = {
@@ -772,6 +816,8 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
         'volumes': 4,
         'notas_fiscais': 3,
         'fornecedor': 2,
+        'origem': 8,
+        'id': 9,
         'remetente': 10,
         'assunto': 11,
         'vols_recebidos': 12,
@@ -818,9 +864,11 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
           origemText = dados.origem;
       } else if (dados.remetente || dados.assunto) {
           origemText = "Automação / E-mail";
+      } else if (providedId && !String(providedId).startsWith("MANUAL_")) {
+          origemText = "Agendamento Manual (Gmail)";
       }
 
-      const statusInicial = dados.status || (origemText === "Agendamento Manual" ? "CONFIRMADO" : "PENDENTE");
+      const statusInicial = dados.status || ((origemText === "Agendamento Manual" || origemText === "Agendamento Manual (Gmail)") ? "CONFIRMADO" : "PENDENTE");
 
       const rowData = [
         dataCriacao, 
@@ -832,8 +880,8 @@ function salvarAgendamento(dados, enviarEmail = false, corpoEmail = "") {
         statusInicial, 
         origemText, 
         idUnico, 
-        dados.remetente || (origemText === "Agendamento Manual" ? "Manual" : ""), 
-        dados.assunto || (origemText === "Agendamento Manual" ? "Agendamento Criado Manualmente" : ""), 
+        dados.remetente || (origemText.startsWith("Agendamento Manual") ? "Manual" : ""), 
+        dados.assunto || (origemText.startsWith("Agendamento Manual") ? "Agendamento Criado Manualmente" : ""), 
         dados.vols_recebidos || 0, 
         dados.resumo_direto || ""
       ];
@@ -1035,10 +1083,14 @@ function excluirDivergencia(index) {
 // ==================== FUNÇÕES PRINCIPAIS (WEB APP & API REST) ====================
 
 function doGet(e) {
-  // Se for acesso direto sem parâmetro action, abre a página web interna
+  // Se for acesso direto sem parâmetro action, abre a página web interna (index ou promotores)
   if (!e || !e.parameter || !e.parameter.action) {
-    return HtmlService.createHtmlOutputFromFile("index")
-      .setTitle("Ri Happy | Estoque e Agendamentos")
+    const isPromotores = Boolean(e && e.parameter && (e.parameter.page === 'promotores' || e.parameter.view === 'promotores' || e.parameter.p === 'promotores'));
+    const fileName = isPromotores ? "promotores" : "index";
+    const title = isPromotores ? "Ri Happy | Portal do Promotor & Lojas" : "Ri Happy | Estoque e Agendamentos";
+
+    return HtmlService.createHtmlOutputFromFile(fileName)
+      .setTitle(title)
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
       .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
   }

@@ -434,6 +434,24 @@
                    </select>
                 </div>
 
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                       <label class="block text-[11px] font-black text-slate-400 uppercase tracking-wide flex items-center gap-1">
+                          <span class="material-symbols-outlined text-[15px] text-primary">mail</span> Link / ID do Gmail <span class="text-[9px] font-normal text-slate-400 normal-case">(Opcional)</span>
+                       </label>
+                       <span id="gmail-link-badge" class="hidden text-[9px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                          <span class="material-symbols-outlined text-[12px]">link</span> Vinculado
+                       </span>
+                    </div>
+                    <div class="relative">
+                       <input type="text" id="f-gmail-link" oninput="atualizarStatusLinkGmail()" placeholder="Ex: https://mail.google.com/mail/u/0/#all/18d8f92abc... ou ID" class="w-full border-slate-200 rounded-xl p-4 text-xs focus:ring-primary focus:border-primary shadow-sm font-mono text-slate-700 pr-10">
+                       <button type="button" id="btn-test-gmail-link" onclick="testarGmailLinkDigitado()" title="Testar abertura no Gmail" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-primary rounded-lg hover:bg-slate-100 transition-all">
+                          <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                       </button>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-1">Cole o link da conversa do Gmail para vincular ao agendamento e habilitar respostas diretas.</p>
+                 </div>
+
                 <div class="md:hidden">
                    <label class="block text-[11px] font-black text-slate-400 mb-1.5 uppercase tracking-wide">Observações</label>
                    <textarea id="f-obs-mob" rows="2" class="w-full border-slate-200 rounded-xl p-4 text-sm focus:ring-primary focus:border-primary shadow-sm"></textarea>
@@ -465,7 +483,8 @@
     <div class="flex items-center gap-3">
       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
+       <button type="button" onclick="compartilharPortalPromotor()" class="w-9 h-9 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full flex items-center justify-center active:scale-95 transition-all" title="Compartilhar Portal com Promotores"><span class="material-symbols-outlined text-[18px]">share</span></button>
        <button type="button" onclick="gerarTextoWpp()" class="w-9 h-9 bg-[#25D366]/10 rounded-full flex items-center justify-center text-[#25D366]"><span class="material-symbols-outlined text-[18px]">chat</span></button>
        <button type="button" onclick="abrirSettings()" class="w-9 h-9 border border-slate-200 rounded-full flex items-center justify-center text-slate-400"><span class="material-symbols-outlined text-[18px]">settings</span></button>
        <button type="button" onclick="abrirModal()" class="w-9 h-9 bg-primary text-white rounded-full shadow-md shadow-primary/30 font-bold flex items-center justify-center active:scale-95">
@@ -493,6 +512,7 @@
              <button type="button" onclick="abrirModal()" class="flex-1 py-3 bg-primary text-white rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-[13px] flex items-center justify-center active:scale-95">
                <span class="material-symbols-outlined text-[20px] mr-1.5">add</span> Agendar
              </button>
+             <button type="button" onclick="compartilharPortalPromotor()" class="w-11 h-11 border border-emerald-200 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors" title="Compartilhar Link com Promotores"><span class="material-symbols-outlined text-[20px]">share</span></button>
              <button type="button" onclick="gerarTextoWpp()" class="w-11 h-11 bg-[#25D366]/10 rounded-xl flex items-center justify-center text-[#25D366] hover:bg-[#25D366]/20 transition-colors" title="Copiar Texto WhatsApp"><span class="material-symbols-outlined text-[20px]">chat</span></button>
              <button type="button" onclick="abrirSettings()" class="w-11 h-11 border border-slate-200 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 hover:text-primary transition-colors" title="Configurações"><span class="material-symbols-outlined text-[20px]">settings</span></button>
           </div>
@@ -504,6 +524,9 @@
              </button>
              <button type="button" onclick="abrirModal()" class="w-full aspect-square bg-primary text-white rounded-xl shadow-md shadow-primary/30 hover:bg-primary-hover transition-colors font-bold text-xs flex items-center justify-center active:scale-95 mt-2">
                <span class="material-symbols-outlined text-[20px]">add</span>
+             </button>
+             <button type="button" onclick="compartilharPortalPromotor()" class="w-full aspect-square bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl flex items-center justify-center active:scale-95 transition-all mt-1" title="Compartilhar Link com Promotores">
+               <span class="material-symbols-outlined text-[18px]">share</span>
              </button>
           </div>
        </div>
@@ -1851,13 +1874,73 @@
     }
 
     // ============================================================
-    // AÇÕES DO USUÁRIO
+    // AÇÕES DO USUÁRIO & INTEGRAÇÃO GMAIL
     // ============================================================
+    function extrairThreadIdGmail(input) {
+      if (!input) return "";
+      let str = String(input).trim();
+      if (!str) return "";
+      
+      // Se for uma URL do Gmail (ex: https://mail.google.com/mail/u/0/#all/18dc3a123f8b9101, #inbox/..., #search/termo/18dc3a...)
+      if (str.includes("mail.google.com") || str.includes("#")) {
+         const hashMatch = str.match(/#(?:all|inbox|sent|starred|trash|search\/[^/]+|label\/[^/]+|category\/[^/]+)?\/?([a-zA-Z0-9_-]{10,})/i);
+         if (hashMatch && hashMatch[1]) {
+            return hashMatch[1];
+         }
+         const urlSegments = str.split(/[/?#]/).filter(Boolean);
+         for (let i = urlSegments.length - 1; i >= 0; i--) {
+            const segment = urlSegments[i];
+            if (/^[a-zA-Z0-9_-]{10,}$/.test(segment)) {
+               return segment;
+            }
+         }
+      }
+      
+      // Se for ID alfanumérico direto
+      if (/^[a-zA-Z0-9_-]{10,}$/.test(str)) {
+         return str;
+      }
+      
+      return str;
+    }
+
+    function atualizarStatusLinkGmail() {
+      const input = document.getElementById('f-gmail-link');
+      const badge = document.getElementById('gmail-link-badge');
+      const testBtn = document.getElementById('btn-test-gmail-link');
+      if (!input) return;
+      
+      const val = input.value.trim();
+      const threadId = extrairThreadIdGmail(val);
+      const isValido = Boolean(threadId && threadId.length >= 8 && !threadId.startsWith('MANUAL_') && !threadId.startsWith('ROW_'));
+      
+      if (badge) {
+        if (isValido) badge.classList.remove('hidden');
+        else badge.classList.add('hidden');
+      }
+      if (testBtn) {
+        if (isValido) testBtn.classList.remove('hidden');
+        else testBtn.classList.add('hidden');
+      }
+    }
+
+    function testarGmailLinkDigitado() {
+      const input = document.getElementById('f-gmail-link');
+      if (!input) return;
+      const threadId = extrairThreadIdGmail(input.value.trim());
+      if (threadId) {
+        window.open(`https://mail.google.com/mail/u/0/#all/${threadId}`, '_blank');
+      } else {
+        notify('Aviso', 'Insira um link ou ID válido do Gmail para testar.', 'warning');
+      }
+    }
+
     function abrirModal(item = null, isFlow = false) {
       const f = document.getElementById('form-agendamento'); 
       if(f) f.reset();
       const context = document.getElementById('email-context-view');
       const contextMob = document.getElementById('email-context-view-mob');
+      const gmailInput = document.getElementById('f-gmail-link');
       
       if (item) {
         document.getElementById('modal-title').innerText = isFlow ? 'Agendar Entrega' : 'Editar Agendamento';
@@ -1883,6 +1966,14 @@
         document.getElementById('f-obs').value = obsVal;
         if(document.getElementById('f-obs-mob')) document.getElementById('f-obs-mob').value = obsVal;
         
+        if (gmailInput) {
+          if (item.id && !item.id.startsWith('MANUAL_') && !item.id.startsWith('ROW_')) {
+             gmailInput.value = `https://mail.google.com/mail/u/0/#all/${item.id.trim()}`;
+          } else {
+             gmailInput.value = '';
+          }
+        }
+
         if (isFlow) {
            const contextHtml = `
              <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
@@ -1918,17 +2009,23 @@
         document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
         document.getElementById('f-status').value = 'CONFIRMADO';
         document.getElementById('f-status-select').value = 'CONFIRMADO';
+        if (gmailInput) gmailInput.value = '';
         if(context) context.innerHTML = '<p class="text-center py-10 text-slate-400 text-xs italic font-bold">Novo Agendamento Manual</p>';
         if(contextMob) contextMob.innerHTML = '';
       }
+      atualizarStatusLinkGmail();
       atualizarTermometroCapacidade(document.getElementById('f-data').value);
       abrirModalGenerico('modal-agendamento');
     }
 
     function abrirGmail() {
        const id = document.getElementById('f-id').value;
-       if(id && id.length > 5 && !id.startsWith('ROW_')) {
-          window.open(`https://mail.google.com/mail/u/0/#all/${id.trim()}`, '_blank');
+       const gmailLinkInput = document.getElementById('f-gmail-link') ? document.getElementById('f-gmail-link').value : '';
+       const extractedId = extrairThreadIdGmail(gmailLinkInput);
+       const targetId = extractedId || id;
+
+       if(targetId && targetId.length > 5 && !targetId.startsWith('ROW_') && !targetId.startsWith('MANUAL_')) {
+          window.open(`https://mail.google.com/mail/u/0/#all/${targetId.trim()}`, '_blank');
        } else {
           notify('Aviso', 'Este agendamento não possui e-mail vinculado.', 'warning');
        }
@@ -1936,8 +2033,12 @@
 
     function abrirRespostaRapida() {
        const id = document.getElementById('f-id').value;
-       if (!id || id.startsWith('ROW_')) {
-          notify('Aviso', 'Não há um e-mail vinculado a este agendamento para responder.', 'warning');
+       const gmailLinkInput = document.getElementById('f-gmail-link') ? document.getElementById('f-gmail-link').value : '';
+       const extractedId = extrairThreadIdGmail(gmailLinkInput);
+       const targetId = extractedId || id;
+
+       if (!targetId || targetId.startsWith('ROW_') || targetId.startsWith('MANUAL_')) {
+          notify('Aviso', 'Não há um e-mail vinculado a este agendamento para responder. Adicione o link da thread do Gmail primeiro.', 'warning');
           return;
        }
        document.getElementById('resposta-texto').value = '';
@@ -1970,7 +2071,11 @@
     }
 
     async function enviarRespostaRapida() {
-       const id = document.getElementById('f-id').value;
+       let id = document.getElementById('f-id').value;
+       const gmailLinkInput = document.getElementById('f-gmail-link') ? document.getElementById('f-gmail-link').value : '';
+       const extractedId = extrairThreadIdGmail(gmailLinkInput);
+       if (extractedId) id = extractedId;
+
        const msg = document.getElementById('resposta-texto').value.trim();
        if (!msg) {
           notify('Erro', 'A mensagem não pode estar vazia.', 'error');
@@ -2096,7 +2201,15 @@
        e.preventDefault();
        const dtStr = document.getElementById('f-data').value;
        const nfStr = document.getElementById('f-nf').value;
-       const selfId = document.getElementById('f-id').value;
+       let selfId = document.getElementById('f-id').value;
+       const rawGmailLink = document.getElementById('f-gmail-link') ? document.getElementById('f-gmail-link').value.trim() : '';
+       const extractedThreadId = extrairThreadIdGmail(rawGmailLink);
+
+       if (extractedThreadId) {
+          selfId = extractedThreadId;
+       } else if (!selfId || selfId.startsWith('MANUAL_')) {
+          if (!selfId) selfId = 'MANUAL_' + new Date().getTime();
+       }
 
        const dSel = parseSafeDate(dtStr);
        const invDate = parseSafeDate(settings.data_inventario);
@@ -2121,6 +2234,8 @@
           if (!ok) return;
        }
 
+       const isVinculadoGmail = Boolean(selfId && !selfId.startsWith('MANUAL_') && !selfId.startsWith('ROW_'));
+
        const payload = {
           id: selfId,
           data_agendada: dtStr,
@@ -2131,7 +2246,9 @@
           observacoes: (window.innerWidth < 768 && document.getElementById('f-obs-mob')) ? document.getElementById('f-obs-mob').value : document.getElementById('f-obs').value,
           remetente: document.getElementById('f-remetente').value,
           assunto: document.getElementById('f-assunto').value,
-          resumo_direto: document.getElementById('f-resumo-direto').value
+          resumo_direto: document.getElementById('f-resumo-direto').value,
+          origem: isVinculadoGmail ? (document.getElementById('f-remetente').value ? 'Automação / E-mail' : 'Agendamento Manual (Gmail)') : 'Agendamento Manual',
+          rowIndex: document.getElementById('f-row-index').value || ''
        };
        
        mostrarLoading("Salvando Agendamento...", "Gravando dados no banco de dados...", "save");
@@ -2424,6 +2541,20 @@
       copyText.select(); navigator.clipboard.writeText(copyText.value);
       notify('Copiado!', 'Texto copiado com sucesso.', 'info');
       fecharModal('modal-wpp');
+    }
+
+    function compartilharPortalPromotor() {
+      let url = window.location.origin + window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '') + '/promotores.html';
+      if (window.location.hostname.includes('script.google.com')) {
+        url = window.location.href.split('?')[0] + '?page=promotores';
+      }
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url);
+        notify('Link Copiado! 🔗', 'O link do Portal de Promotores foi copiado para a área de transferência.', 'info');
+      } else {
+        prompt('Copie o link do Portal de Promotores:', url);
+      }
     }
 
     function verificarDuplicatas() {
