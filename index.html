@@ -2544,8 +2544,9 @@
     }
 
     function compartilharPortalPromotor() {
-      let url = window.location.origin + window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '') + '/promotores.html';
-      if (window.location.hostname.includes('script.google.com')) {
+      let customUrl = localStorage.getItem('url_portal_promotores');
+      let url = customUrl || (window.location.origin + window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '') + '/promotores.html');
+      if (!customUrl && window.location.hostname.includes('script.google.com')) {
         url = window.location.href.split('?')[0] + '?page=promotores';
       }
       
