@@ -58,6 +58,7 @@
       display: inline-flex;
       align-items: center;
       gap: 3px;
+      white-space: nowrap;
     }
     .status-pendente { background: #fef3c7; color: #92400e; }
     .status-confirmado { background: #dbeafe; color: #1e40af; }
@@ -67,13 +68,13 @@
     .status-atrasado { background: #fecaca; color: #dc2626; }
   </style>
 </head>
-<body class="bg-background text-on-surface flex flex-col min-h-screen antialiased selection:bg-red-500 selection:text-white">
+<body class="bg-background text-on-surface flex flex-col min-h-screen antialiased selection:bg-red-500 selection:text-white pb-8 sm:pb-12">
 
   <div class="notif-container" id="notif-container"></div>
 
   <!-- LOADING OVERLAY -->
   <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center transition-all duration-300 opacity-0 pointer-events-none">
-    <div class="bg-white p-5 rounded-3xl shadow-2xl flex flex-col items-center gap-3 max-w-xs text-center border border-slate-100">
+    <div class="bg-white p-5 rounded-3xl shadow-2xl flex flex-col items-center gap-3 max-w-xs text-center border border-slate-100 mx-4">
       <div class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-primary animate-spin"></div>
       <div>
         <h3 id="loading-title" class="font-extrabold text-slate-800 text-sm">Consultando Entregas...</h3>
@@ -83,21 +84,21 @@
   </div>
 
   <!-- HEADER COMPACTO MOBILE & DESKTOP -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-4xl mx-auto px-4 py-2.5 flex justify-between items-center">
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-4xl mx-auto px-3.5 sm:px-6 py-2.5 flex justify-between items-center gap-2">
       
       <!-- Brand & Título -->
-      <div class="flex items-center gap-2.5">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-6 object-contain">
-        <div class="h-4 w-px bg-slate-200"></div>
-        <div class="flex flex-col">
-          <span class="text-xs font-black text-slate-800 font-headline leading-tight">Consulta de Entregas</span>
-          <span class="text-[9px] font-bold text-slate-400">Promotores & Lojas</span>
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/RIHAPPY_Logo.svg/960px-RIHAPPY_Logo.svg.png" alt="Ri Happy" class="h-5 sm:h-6 object-contain shrink-0">
+        <div class="h-4 w-px bg-slate-200 shrink-0"></div>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs sm:text-sm font-black text-slate-800 font-headline leading-tight truncate">Consulta de Entregas</span>
+          <span class="text-[9px] font-bold text-slate-400 leading-tight">Promotores & Lojas</span>
         </div>
       </div>
 
       <!-- Atualizar -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <button type="button" onclick="carregarDados(true)" class="p-2 sm:px-3 sm:py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all shadow-xs" title="Atualizar escala">
           <span class="material-symbols-outlined text-[16px] sync-icon">refresh</span>
           <span class="hidden sm:inline text-[11px]">Atualizar</span>
@@ -108,36 +109,36 @@
   </header>
 
   <!-- CONTAINER PRINCIPAL -->
-  <main class="flex-1 max-w-4xl w-full mx-auto px-3.5 sm:px-6 py-4 space-y-4">
+  <main class="flex-1 max-w-4xl w-full mx-auto px-3 sm:px-6 py-3.5 sm:py-5 space-y-3.5 sm:space-y-4">
 
     <!-- RESUMO RÁPIDO COMPACTO EM 1 LINHA -->
-    <div class="bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200 shadow-xs flex items-center justify-between gap-2 overflow-x-auto hide-scrollbar text-xs">
+    <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-xs flex items-center justify-between gap-3 overflow-x-auto hide-scrollbar text-xs">
       <div class="flex items-center gap-2 shrink-0">
-        <div class="w-7 h-7 rounded-lg bg-red-50 text-primary flex items-center justify-center font-bold">
+        <div class="w-7 h-7 rounded-lg bg-red-50 text-primary flex items-center justify-center font-bold shrink-0">
           <span class="material-symbols-outlined text-[16px]">local_shipping</span>
         </div>
-        <div>
-          <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Hoje</span>
-          <span id="mini-hoje" class="font-extrabold text-slate-800 text-xs">0 cargas (0 vols)</span>
+        <div class="min-w-0">
+          <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Hoje (Pendentes)</span>
+          <span id="mini-hoje" class="font-extrabold text-slate-800 text-xs truncate">0 cargas</span>
         </div>
       </div>
 
       <div class="h-6 w-px bg-slate-200 shrink-0"></div>
 
       <div class="flex items-center gap-2 shrink-0">
-        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">
           <span class="material-symbols-outlined text-[16px]">calendar_view_week</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-[9px] font-black text-slate-400 uppercase tracking-tight block">Próximos 7 Dias</span>
-          <span id="mini-semana" class="font-extrabold text-slate-800 text-xs">0 cargas (0 vols)</span>
+          <span id="mini-semana" class="font-extrabold text-slate-800 text-xs truncate">0 cargas (0 vols)</span>
         </div>
       </div>
 
       <div class="h-6 w-px bg-slate-200 shrink-0 hidden sm:block"></div>
 
       <div class="hidden sm:flex items-center gap-2 shrink-0">
-        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
           <span class="material-symbols-outlined text-[16px]">schedule</span>
         </div>
         <div>
@@ -148,21 +149,21 @@
     </div>
 
     <!-- CAMPO DE BUSCA DESTACADO PARA O PROMOTOR -->
-    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-3">
+    <div class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs space-y-2.5">
       
       <!-- Input de Busca -->
       <div class="relative">
-        <span class="material-symbols-outlined text-primary absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px]">search</span>
-        <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="🔍 Digite sua marca ou fornecedor (ex: Mattel, Lego, Estrela...)" class="w-full bg-slate-50 border-slate-200 rounded-xl pl-10 pr-10 py-3 text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-primary focus:border-primary shadow-inner">
-        <button type="button" id="btn-limpar-busca" onclick="limparBusca()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+        <span class="material-symbols-outlined text-primary absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] pointer-events-none">search</span>
+        <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="🔍 Digite sua marca ou fornecedor (ex: Mattel, Lego, Estrela...)" class="w-full bg-slate-50 border-slate-200 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:ring-primary focus:border-primary shadow-inner">
+        <button type="button" id="btn-limpar-busca" onclick="limparBusca()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1.5 rounded-lg active:scale-95" title="Limpar busca">
           <span class="material-symbols-outlined text-[18px]">cancel</span>
         </button>
       </div>
 
       <!-- Pills de Marcas Frequentes (Filtro Rápido com 1 toque) -->
-      <div class="space-y-1.5">
+      <div class="space-y-1">
         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Marcas em Destaque:</span>
-        <div id="brand-pills-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5">
+        <div id="brand-pills-container" class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5 items-center">
           <button type="button" onclick="selecionarMarca('')" class="brand-pill px-3 py-1 bg-slate-800 text-white rounded-full font-black text-[10px] uppercase whitespace-nowrap shadow-xs">Todas</button>
         </div>
       </div>
@@ -174,10 +175,10 @@
       
       <!-- Abas Switcher -->
       <div class="flex bg-slate-200/70 p-1 rounded-xl shrink-0 w-full sm:w-auto">
-        <button type="button" onclick="mudarAba('lista')" id="btn-aba-lista" class="flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs">
+        <button type="button" onclick="mudarAba('lista')" id="btn-aba-lista" class="flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs">
           <span class="material-symbols-outlined text-[16px]">format_list_bulleted</span> Lista de Entregas
         </button>
-        <button type="button" onclick="mudarAba('calendario')" id="btn-aba-calendario" class="flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800">
+        <button type="button" onclick="mudarAba('calendario')" id="btn-aba-calendario" class="flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800">
           <span class="material-symbols-outlined text-[16px]">calendar_month</span> Calendário
         </button>
       </div>
@@ -185,7 +186,7 @@
     </div>
 
     <!-- FILTROS DE TEMPO (HOJE, AMANHÃ, PRÓXIMAS, PASSADAS) -->
-    <div class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5" id="time-filters-bar">
+    <div class="flex overflow-x-auto hide-scrollbar gap-1.5 py-0.5 items-center" id="time-filters-bar">
       <button type="button" onclick="setTimeFilter('proximas')" id="btn-time-proximas" class="time-filter-btn py-1.5 px-3.5 bg-slate-800 text-white rounded-full font-black text-[11px] uppercase tracking-wider whitespace-nowrap shadow-xs">🚀 Próximas Entregas</button>
       <button type="button" onclick="setTimeFilter('hoje')" id="btn-time-hoje" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">Hoje</button>
       <button type="button" onclick="setTimeFilter('amanha')" id="btn-time-amanha" class="time-filter-btn py-1.5 px-3.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-full font-extrabold text-[11px] uppercase tracking-wider whitespace-nowrap">Amanhã</button>
@@ -203,10 +204,10 @@
     <!-- ============================================================ -->
     <!-- VISÃO 2: CALENDÁRIO MENSAL -->
     <!-- ============================================================ -->
-    <div id="view-calendario" class="hidden bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-4">
+    <div id="view-calendario" class="hidden bg-white rounded-3xl p-3.5 sm:p-5 border border-slate-200 shadow-xs space-y-4">
       
       <div class="flex items-center justify-between">
-        <h3 id="mes-calendario" class="text-base font-black text-slate-800 capitalize">Mês</h3>
+        <h3 id="mes-calendario" class="text-sm sm:text-base font-black text-slate-800 capitalize">Mês</h3>
         <div class="flex items-center gap-1">
           <button type="button" onclick="mudarMesCalendario(-1)" class="w-8 h-8 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-slate-600 active:scale-95 transition-all"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
           <button type="button" onclick="currentDateCal = new Date(); aplicarFiltros();" class="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg font-extrabold text-[10px] text-slate-600 uppercase active:scale-95 transition-all">Hoje</button>
@@ -220,7 +221,7 @@
       </div>
 
       <!-- Legenda Simplificada -->
-      <div class="flex flex-wrap items-center gap-3 text-[9px] font-bold text-slate-500 pt-1">
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 text-[9px] font-bold text-slate-500 pt-1">
         <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> Livre</div>
         <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-blue-100 border border-blue-300"></span> Com Entregas</div>
         <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-red-100 border border-red-300"></span> Lotado</div>
@@ -235,17 +236,17 @@
   <div id="modal-dia-entregas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
     <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg shadow-2xl modal-enter overflow-hidden flex flex-col max-h-[85vh]">
       
-      <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-        <div>
-          <h3 id="modal-dia-titulo" class="text-sm sm:text-base font-black text-slate-800 leading-none">Entregas do Dia</h3>
-          <p id="modal-dia-subtitulo" class="text-[11px] font-bold text-slate-400 mt-1">--/--/---- • 0 volumes agendados</p>
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+        <div class="min-w-0">
+          <h3 id="modal-dia-titulo" class="text-sm sm:text-base font-black text-slate-800 leading-tight truncate">Entregas do Dia</h3>
+          <p id="modal-dia-subtitulo" class="text-[11px] font-bold text-slate-400 mt-0.5 truncate">--/--/---- • 0 volumes agendados</p>
         </div>
-        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="p-1.5 bg-white rounded-full text-slate-400 hover:text-slate-700 shadow-xs border border-slate-200"><span class="material-symbols-outlined text-[18px]">close</span></button>
+        <button type="button" onclick="fecharModal('modal-dia-entregas')" class="p-1.5 bg-white rounded-full text-slate-400 hover:text-slate-700 shadow-xs border border-slate-200 shrink-0 ml-2"><span class="material-symbols-outlined text-[18px]">close</span></button>
       </div>
 
-      <div id="modal-dia-lista" class="p-4 sm:p-5 overflow-y-auto custom-scrollbar space-y-2.5 flex-1"></div>
+      <div id="modal-dia-lista" class="p-3.5 sm:p-5 overflow-y-auto custom-scrollbar space-y-2.5 flex-1"></div>
 
-      <div class="p-3.5 border-t border-slate-100 bg-slate-50 flex justify-end">
+      <div class="p-3.5 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
         <button type="button" onclick="fecharModal('modal-dia-entregas')" class="w-full sm:w-auto px-5 py-2.5 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-xs active:scale-95 transition-all">Fechar</button>
       </div>
 
@@ -254,44 +255,44 @@
 
   <!-- MODAL DE DETALHES DA CARGA (SOMENTE LEITURA) -->
   <div id="modal-detalhes-carga" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
-    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-enter overflow-hidden p-5 sm:p-6 space-y-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl modal-enter overflow-hidden p-4 sm:p-6 space-y-3.5 sm:space-y-4">
       
-      <div class="flex justify-between items-start">
-        <div class="flex items-center gap-3">
-          <div id="detalhe-avatar" class="w-10 h-10 rounded-2xl bg-red-100 text-primary font-black text-sm flex items-center justify-center">F</div>
-          <div>
-            <h3 id="detalhe-fornecedor" class="text-base font-black text-slate-800 leading-tight">Fornecedor</h3>
+      <div class="flex justify-between items-start gap-2">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="detalhe-avatar" class="w-10 h-10 rounded-2xl bg-red-100 text-primary font-black text-sm flex items-center justify-center shrink-0">F</div>
+          <div class="min-w-0">
+            <h3 id="detalhe-fornecedor" class="text-sm sm:text-base font-black text-slate-800 leading-snug break-words">Fornecedor</h3>
             <div id="detalhe-status-pill" class="mt-1"></div>
           </div>
         </div>
-        <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="p-1 text-slate-400 hover:text-slate-700"><span class="material-symbols-outlined">close</span></button>
+        <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="p-1 text-slate-400 hover:text-slate-700 shrink-0"><span class="material-symbols-outlined">close</span></button>
       </div>
 
-      <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-xs">
-        <div>
+      <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs">
+        <div class="min-w-0">
           <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Data Prevista</span>
-          <span id="detalhe-data" class="font-extrabold text-slate-800 mt-0.5 block">--/--/----</span>
+          <span id="detalhe-data" class="font-extrabold text-slate-800 mt-0.5 block truncate">--/--/----</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Nota Fiscal (NF)</span>
-          <span id="detalhe-nf" class="font-mono font-extrabold text-slate-800 mt-0.5 block">#000000</span>
+          <span id="detalhe-nf" class="font-mono font-extrabold text-slate-800 mt-0.5 block break-all">#000000</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Volume Total</span>
-          <span id="detalhe-volumes" class="font-extrabold text-primary text-sm mt-0.5 block">0 vol</span>
+          <span id="detalhe-volumes" class="font-extrabold text-primary text-sm mt-0.5 block truncate">0 vol</span>
         </div>
-        <div>
+        <div class="min-w-0">
           <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Horário Shopping</span>
-          <span class="font-extrabold text-slate-700 mt-0.5 block">09h às 14h</span>
+          <span class="font-extrabold text-slate-700 mt-0.5 block truncate">09h às 14h</span>
         </div>
       </div>
 
       <div>
         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">Observações & Instruções</span>
-        <div id="detalhe-obs" class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600 font-medium leading-relaxed max-h-28 overflow-y-auto custom-scrollbar">Nenhuma observação registrada.</div>
+        <div id="detalhe-obs" class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-600 font-medium leading-relaxed max-h-28 overflow-y-auto custom-scrollbar break-words">Nenhuma observação registrada.</div>
       </div>
 
-      <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="w-full py-3 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all shadow-sm">Entendido</button>
+      <button type="button" onclick="fecharModal('modal-detalhes-carga')" class="w-full py-2.5 sm:py-3 bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all shadow-sm">Entendido</button>
 
     </div>
   </div>
@@ -396,6 +397,18 @@
       } catch(e) { return null; }
     }
 
+    function isItemConcluido(item) {
+      if (!item) return false;
+      const s = String(item.status || '').toUpperCase().trim();
+      return ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes(s);
+    }
+
+    function isItemCancelado(item) {
+      if (!item) return false;
+      const s = String(item.status || '').toUpperCase().trim();
+      return s === 'CANCELADO';
+    }
+
     function formatarDataHumanizada(str) {
       if (!str) return '—';
       const d = parseSafeDate(str);
@@ -413,7 +426,13 @@
       return `${dia}/${mes}/${ano}`;
     }
 
-    function calcularBadgeTempo(dtObj) {
+    function calcularBadgeTempo(dtObj, item) {
+      if (isItemConcluido(item)) {
+        return { text: '✅ Já Recebido', color: 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-200' };
+      }
+      if (isItemCancelado(item)) {
+        return { text: '❌ Cancelado', color: 'bg-red-50 text-red-700 font-bold border border-red-200' };
+      }
       if (!dtObj) return { text: '', color: 'bg-slate-100 text-slate-600' };
       const hoje = new Date(); hoje.setHours(0,0,0,0);
       const dataAlvo = new Date(dtObj); dataAlvo.setHours(0,0,0,0);
@@ -423,8 +442,8 @@
       if (diffDias === 1) return { text: '⚡ Chega Amanhã', color: 'bg-amber-100 text-amber-800 font-extrabold border border-amber-200' };
       if (diffDias > 1 && diffDias <= 6) return { text: `Em ${diffDias} dias`, color: 'bg-blue-50 text-blue-700 font-bold border border-blue-200' };
       if (diffDias > 6) return { text: 'Próxima semana', color: 'bg-slate-100 text-slate-600 font-bold' };
-      if (diffDias === -1) return { text: 'Ontem', color: 'bg-slate-100 text-slate-500' };
-      return { text: 'Passado', color: 'bg-slate-100 text-slate-400' };
+      if (diffDias === -1) return { text: 'Ontem (Pendente)', color: 'bg-amber-50 text-amber-800 font-bold border border-amber-200' };
+      return { text: 'Pendente', color: 'bg-slate-100 text-slate-500 font-bold' };
     }
 
     const getAvatarStyle = (nome) => {
@@ -442,6 +461,7 @@
         'AGUARDANDO LIBERAÇÃO': 'status-pendente',
         'CONCLUÍDO': 'status-concluido',
         'CONCLUIDO': 'status-concluido',
+        'RECEBIDO': 'status-concluido',
         'CANCELADO': 'status-cancelado',
         'ATRASADO': 'status-atrasado'
       };
@@ -460,14 +480,14 @@
         if(viewList) viewList.classList.remove('hidden');
         if(viewCal) viewCal.classList.add('hidden');
         if(timeBar) timeBar.classList.remove('hidden');
-        btnList.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
-        btnCal.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
+        btnList.className = "flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
+        btnCal.className = "flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
       } else {
         if(viewList) viewList.classList.add('hidden');
         if(viewCal) viewCal.classList.remove('hidden');
         if(timeBar) timeBar.classList.add('hidden');
-        btnCal.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
-        btnList.className = "flex-1 sm:flex-initial py-2 px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
+        btnCal.className = "flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-white text-slate-800 shadow-xs";
+        btnList.className = "flex-1 sm:flex-initial py-2 px-3.5 sm:px-4 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800";
       }
     }
 
@@ -589,16 +609,28 @@
       const hoje = new Date(); hoje.setHours(0,0,0,0);
       const em7Dias = new Date(hoje); em7Dias.setDate(em7Dias.getDate() + 7);
 
-      const cargasHoje = stateAgendamentos.filter(i => {
+      const cargasHojePendentes = stateAgendamentos.filter(i => {
         const dt = parseSafeDate(i.data_agendada || i.data_real);
-        return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear() && (i.status || '').toUpperCase() !== 'CANCELADO';
+        return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear() && !isItemConcluido(i) && !isItemCancelado(i);
       });
-      const volsHoje = cargasHoje.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
-      document.getElementById('mini-hoje').innerText = `${cargasHoje.length} carga(s) • ${volsHoje} vols`;
+      const volsHojePendentes = cargasHojePendentes.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
+
+      const cargasHojeConcluidas = stateAgendamentos.filter(i => {
+        const dt = parseSafeDate(i.data_agendada || i.data_real);
+        return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear() && isItemConcluido(i);
+      });
+
+      if (cargasHojePendentes.length > 0) {
+        document.getElementById('mini-hoje').innerText = `${cargasHojePendentes.length} pendente(s) • ${volsHojePendentes} vols`;
+      } else if (cargasHojeConcluidas.length > 0) {
+        document.getElementById('mini-hoje').innerText = `✅ ${cargasHojeConcluidas.length} recebida(s)`;
+      } else {
+        document.getElementById('mini-hoje').innerText = `0 pendentes hoje`;
+      }
 
       const cargasSemana = stateAgendamentos.filter(i => {
         const dt = parseSafeDate(i.data_agendada || i.data_real);
-        return dt && dt >= hoje && dt <= em7Dias && (i.status || '').toUpperCase() !== 'CANCELADO';
+        return dt && dt >= hoje && dt <= em7Dias && !isItemConcluido(i) && !isItemCancelado(i);
       });
       const volsSemana = cargasSemana.reduce((a, b) => a + (Number(b.volumes) || 0), 0);
       document.getElementById('mini-semana').innerText = `${cargasSemana.length} carga(s) • ${volsSemana} vols`;
@@ -629,22 +661,26 @@
         }
 
         const dt = parseSafeDate(i.data_agendada || i.data_real);
-        const isCancelado = (i.status || '').toUpperCase() === 'CANCELADO';
-        if (isCancelado && currentTimeFilter !== 'passadas') return false;
+        const conc = isItemConcluido(i);
+        const canc = isItemCancelado(i);
 
-        const isConcluido = ['CONCLUÍDO', 'CONCLUIDO', 'RECEBIDO'].includes((i.status || '').toUpperCase());
-
+        // GARANTIA: Se estiver marcado como CONCLUÍDO/RECEBIDO ou CANCELADO,
+        // NUNCA aparece na lista de pendentes (Próximas, Hoje, Amanhã, Semana)
         if (currentTimeFilter === 'proximas') {
-          // Hoje em diante (não recebidas) OU recebidas hoje
+          if (conc || canc) return false;
           return dt && (dt >= hoje || (dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear()));
         } else if (currentTimeFilter === 'hoje') {
+          if (conc || canc) return false;
           return dt && dt.getDate() === hoje.getDate() && dt.getMonth() === hoje.getMonth() && dt.getFullYear() === hoje.getFullYear();
         } else if (currentTimeFilter === 'amanha') {
+          if (conc || canc) return false;
           return dt && dt.getDate() === amanha.getDate() && dt.getMonth() === amanha.getMonth() && dt.getFullYear() === amanha.getFullYear();
         } else if (currentTimeFilter === 'semana') {
+          if (conc || canc) return false;
           return dt && dt >= hoje && dt <= em7Dias;
         } else if (currentTimeFilter === 'passadas') {
-          return (dt && dt < hoje) || isConcluido;
+          // Histórico: Itens já concluídos OU cancelados OU com data anterior a hoje
+          return conc || canc || (dt && dt < hoje);
         }
 
         return true;
@@ -659,16 +695,23 @@
       if (!container) return;
 
       if (lista.length === 0) {
+        let msgVazia = 'Nenhuma entrega encontrada para este filtro.';
+        if (currentTimeFilter === 'hoje') msgVazia = 'Nenhuma entrega pendente para hoje. Tudo em dia! 🙌';
+        if (currentTimeFilter === 'proximas') msgVazia = 'Nenhuma entrega futura pendente no momento.';
+
         container.innerHTML = `
-          <div class="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs space-y-3">
-            <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-              <span class="material-symbols-outlined text-[28px]">search_off</span>
+          <div class="bg-white rounded-3xl p-8 sm:p-10 text-center border border-slate-200 shadow-xs space-y-3">
+            <div class="w-12 sm:w-14 h-12 sm:h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-[24px] sm:text-[28px]">inventory</span>
             </div>
             <div>
-              <h4 class="font-extrabold text-slate-800 text-sm">Nenhuma entrega encontrada</h4>
-              <p class="text-xs text-slate-400 mt-1">Verifique o nome da marca ou altere o filtro de data acima.</p>
+              <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm">${msgVazia}</h4>
+              <p class="text-[11px] text-slate-400 mt-1">Experimente buscar por outra marca ou consultar o histórico.</p>
             </div>
-            <button type="button" onclick="limparBusca(); setTimeFilter('proximas');" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">Ver Todas as Próximas</button>
+            <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
+              <button type="button" onclick="limparBusca(); setTimeFilter('proximas');" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">Ver Todas as Próximas</button>
+              <button type="button" onclick="setTimeFilter('passadas');" class="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl font-bold text-xs">Ver Histórico Recebidos</button>
+            </div>
           </div>
         `;
         return;
@@ -719,11 +762,11 @@
             
             <!-- Cabeçalho do Dia -->
             <div class="flex items-baseline justify-between px-1">
-              <div class="flex items-baseline gap-1.5 flex-wrap">
-                <h3 class="text-xs sm:text-sm font-black ${headerColor} uppercase tracking-tight">${tituloGrupo}</h3>
-                ${subGrupo ? `<span class="text-[10px] font-bold text-slate-400">${subGrupo}</span>` : ''}
+              <div class="flex items-baseline gap-1.5 flex-wrap min-w-0">
+                <h3 class="text-xs sm:text-sm font-black ${headerColor} uppercase tracking-tight truncate">${tituloGrupo}</h3>
+                ${subGrupo ? `<span class="text-[10px] font-bold text-slate-400 truncate">${subGrupo}</span>` : ''}
               </div>
-              <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">${itens.length} carga(s) • ${totalVolsGrupo} vols</span>
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">${itens.length} carga(s) • ${totalVolsGrupo} vols</span>
             </div>
 
             <!-- Cards de Entrega do Dia -->
@@ -734,18 +777,18 @@
           const realIdx = stateAgendamentos.findIndex(x => x.id === item.id);
           const av = getAvatarStyle(item.fornecedor);
           const dtObj = parseSafeDate(item.data_agendada || item.data_real);
-          const badgeTempo = calcularBadgeTempo(dtObj);
+          const badgeTempo = calcularBadgeTempo(dtObj, item);
           const badgeStatus = getStatusBadge(item.status);
 
           html += `
             <div onclick="abrirDetalheCarga(${realIdx})" class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-300 active:scale-[0.99] transition-all cursor-pointer flex flex-col gap-2.5">
               
               <div class="flex justify-between items-start gap-2">
-                <div class="flex items-center gap-3 overflow-hidden">
-                  <div class="w-10 h-10 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-sm shrink-0 shadow-xs">${av.initial}</div>
-                  <div class="overflow-hidden">
-                    <h4 class="font-extrabold text-slate-800 text-sm sm:text-base truncate leading-tight">${item.fornecedor || 'Fornecedor Não Informado'}</h4>
-                    <p class="text-[11px] text-slate-500 font-mono mt-0.5">Nota Fiscal: <strong class="text-slate-700">#${item.notas_fiscais || 'S/N'}</strong></p>
+                <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div class="w-9 sm:w-10 h-9 sm:h-10 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-xs sm:text-sm shrink-0 shadow-xs">${av.initial}</div>
+                  <div class="min-w-0">
+                    <h4 class="font-extrabold text-slate-800 text-xs sm:text-sm leading-snug break-words">${item.fornecedor || 'Fornecedor Não Informado'}</h4>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500 font-mono mt-0.5 break-all">Nota Fiscal: <strong class="text-slate-700">#${item.notas_fiscais || 'S/N'}</strong></p>
                   </div>
                 </div>
 
@@ -755,7 +798,7 @@
                 </div>
               </div>
 
-              <div class="flex justify-between items-center pt-2.5 border-t border-slate-100 text-xs">
+              <div class="flex justify-between items-center pt-2 border-t border-slate-100 text-xs">
                 <div class="flex items-center gap-1.5 text-slate-600 font-bold">
                   <span class="material-symbols-outlined text-[15px] text-primary">inventory_2</span>
                   <span>Volume: <strong class="text-slate-900 font-black">${item.volumes || 0}</strong> cx/vol</span>
@@ -802,7 +845,7 @@
       });
 
       for (let i = 0; i < primeiroDia; i++) {
-        html += `<div class="bg-slate-50/50 min-h-[55px] sm:min-h-[75px]"></div>`;
+        html += `<div class="bg-slate-50/50 min-h-[50px] sm:min-h-[70px]"></div>`;
       }
 
       const hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -822,7 +865,7 @@
 
         const entsDia = lista.filter(i => {
           const dt = parseSafeDate(i.data_agendada || i.data_real);
-          return dt && dt.getDate() === d && dt.getMonth() === mes && dt.getFullYear() === ano && (i.status || '').toUpperCase() !== 'CANCELADO';
+          return dt && dt.getDate() === d && dt.getMonth() === mes && dt.getFullYear() === ano && !isItemCancelado(i);
         });
 
         const volsDia = entsDia.reduce((acc, i) => acc + (Number(i.volumes) || 0), 0);
@@ -847,7 +890,7 @@
         }
 
         html += `
-          <button type="button" onclick="abrirModalDia(${ano}, ${mes}, ${d})" class="${bg} p-1 min-h-[55px] sm:min-h-[75px] flex flex-col justify-between items-center text-center relative hover:shadow-inner active:scale-95 transition-all cursor-pointer">
+          <button type="button" onclick="abrirModalDia(${ano}, ${mes}, ${d})" class="${bg} p-1 min-h-[50px] sm:min-h-[70px] flex flex-col justify-between items-center text-center relative hover:shadow-inner active:scale-95 transition-all cursor-pointer">
             <span class="text-[9px] sm:text-[10px] font-black ${isToday ? 'w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center' : 'text-slate-500'}">${d}</span>
             <div class="my-auto">${badgeHtml}</div>
           </button>
@@ -863,7 +906,7 @@
     function abrirModalDia(ano, mes, dia) {
       const entregas = stateAgendamentos.filter(i => {
         const dt = parseSafeDate(i.data_agendada || i.data_real);
-        return dt && dt.getDate() === dia && dt.getMonth() === mes && dt.getFullYear() === ano && (i.status || '').toUpperCase() !== 'CANCELADO';
+        return dt && dt.getDate() === dia && dt.getMonth() === mes && dt.getFullYear() === ano && !isItemCancelado(i);
       });
 
       const dataStr = `${String(dia).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}/${ano}`;
@@ -887,11 +930,11 @@
 
           return `
             <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2.5 overflow-hidden">
+              <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-8 h-8 rounded-xl ${av.colorClass} flex items-center justify-center font-black text-xs shrink-0">${av.initial}</div>
-                <div class="overflow-hidden">
+                <div class="min-w-0">
                   <h4 class="font-extrabold text-slate-800 text-xs truncate">${i.fornecedor || 'Desconhecido'}</h4>
-                  <p class="text-[10px] text-slate-500 font-mono">NF: #${i.notas_fiscais || '-'} • Vol: <strong class="text-primary">${i.volumes || 0}</strong></p>
+                  <p class="text-[10px] text-slate-500 font-mono truncate">NF: #${i.notas_fiscais || '-'} • Vol: <strong class="text-primary">${i.volumes || 0}</strong></p>
                 </div>
               </div>
               <div class="shrink-0">${badge}</div>
